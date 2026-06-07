@@ -482,8 +482,8 @@
       let allCompaniesData = [];
       let isAccountVerified = false; // Flag សំរាប់ Check ថាបាន Verify U-PAY នៅ
 
-      const API_URL = "http://localhost:4000/api";
-      const UPAY_API = "http://localhost:3000/api/bank";
+      const API_URL = "https://payhub-kh.onrender.com";
+      const UPAY_API = "https://u-pay-bank.onrender.com/api/bank";
 
       function switchView(view) {
         ["overview", "companies"].forEach((v) => {
@@ -604,7 +604,9 @@
         });
 
         try {
-          const res = await fetch(`${UPAY_API}/verify-account/${accNo}`);
+          const res = await fetch(
+            `https://u-pay-bank.onrender.com/api/bank/verify-account/${accNum}`,
+          );
           const data = await res.json();
           Swal.close();
 
