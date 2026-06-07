@@ -1,0 +1,2309 @@
+<!doctype html>
+<html lang="km">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayHub KH | Enterprise Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Moul&display=swap");
+
+      body {
+        font-family: "Inter", "Kantumruy Pro", sans-serif;
+        background-color: #f4f7fe;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .nav-active {
+        background: linear-gradient(
+          90deg,
+          rgba(79, 70, 229, 0.1) 0%,
+          rgba(79, 70, 229, 0) 100%
+        );
+        color: #4f46e5;
+        border-left: 4px solid #4f46e5;
+        font-weight: 600;
+      }
+      .nav-inactive {
+        color: #64748b;
+        border-left: 4px solid transparent;
+      }
+      .nav-inactive:hover {
+        background-color: #f8fafc;
+        color: #0f172a;
+      }
+
+      .edc-font {
+        font-family: "Battambang", sans-serif;
+      }
+      .edc-font-moul {
+        font-family: "Moul", serif;
+      }
+
+      /* ទំហំក្រដាស A4 ប្រាកដប្រជា */
+      .a4-paper {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 10mm;
+        background: white;
+        color: #005bb5;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      /* Responsive Scaling សម្រាប់ Modal */
+      .scale-wrapper {
+        display: flex;
+        justify-content: center;
+        transform-origin: top center;
+        transform: scale(0.65);
+        margin-bottom: -100mm;
+      }
+      @media (max-width: 1024px) {
+        .scale-wrapper {
+          transform: scale(0.5);
+          margin-bottom: -150mm;
+        }
+      }
+      @media (max-width: 768px) {
+        .scale-wrapper {
+          transform: scale(0.35);
+          margin-bottom: -190mm;
+        }
+      }
+
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #slip-print-area,
+        #slip-print-area * {
+          visibility: visible;
+        }
+        #slip-print-area {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+        }
+        .scale-wrapper {
+          transform: none !important;
+          margin: 0 !important;
+        }
+        .a4-paper {
+          width: 100%;
+          min-height: auto;
+          padding: 15mm;
+        }
+        #slip-modal-container {
+          background: transparent;
+          box-shadow: none;
+          overflow: visible;
+          max-height: none;
+        }
+        .no-print {
+          display: none !important;
+        }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="flex h-screen overflow-hidden text-slate-800 relative">
+    <script>
+      const session = JSON.parse(localStorage.getItem("payhub_session"));
+      if (!session || !session.isLoggedIn) window.location.href = "login.html";
+      else if (session.role === "superadmin")
+        window.location.href = "admin.html";
+    </script>
+
+    <aside
+      class="w-64 bg-white border-r border-slate-200 flex flex-col transition-all duration-300 z-20 shadow-sm no-print"
+    >
+      <div class="h-[76px] flex items-center px-6 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white"
+          >
+            <i data-lucide="zap" class="w-5 h-5 fill-current"></i>
+          </div>
+          <span class="text-xl font-bold tracking-tight text-slate-900"
+            >PayHub KH</span
+          >
+        </div>
+      </div>
+      <div class="px-6 py-5">
+        <p
+          class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"
+        >
+          ម៉ឺនុយចម្បង
+        </p>
+        <nav class="space-y-1 -mx-3">
+          <button
+            onclick="switchView('dashboard')"
+            id="nav-dashboard"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg transition-all nav-active"
+          >
+            <i data-lucide="pie-chart" class="w-5 h-5"></i> ទិដ្ឋភាពទូទៅ
+          </button>
+          <button
+            onclick="switchView('invoices')"
+            id="nav-invoices"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg transition-all nav-inactive"
+          >
+            <i data-lucide="receipt" class="w-5 h-5"></i> គ្រប់គ្រងវិក្កយបត្រ
+          </button>
+          <button
+            onclick="switchView('bulk')"
+            id="nav-bulk"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg transition-all nav-inactive"
+          >
+            <i data-lucide="zap" class="w-5 h-5"></i> ចេញវិក្កយបត្ររហ័ស
+          </button>
+          <button
+            onclick="switchView('customers')"
+            id="nav-customers"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg transition-all nav-inactive"
+          >
+            <i data-lucide="users" class="w-5 h-5"></i> ឯកសារអតិថិជន
+          </button>
+        </nav>
+      </div>
+      <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
+        <div class="flex items-center gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg"
+            id="sidebar-avatar"
+          >
+            C
+          </div>
+          <div class="text-left overflow-hidden">
+            <p
+              class="text-sm font-bold text-slate-900 truncate"
+              id="sidebar-company-name"
+            >
+              Company
+            </p>
+            <p class="text-xs text-slate-500 truncate" id="sidebar-email">
+              user@domain.com
+            </p>
+          </div>
+        </div>
+        <button
+          onclick="logout()"
+          class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 rounded-lg transition-colors text-sm font-semibold shadow-sm"
+        >
+          <i data-lucide="log-out" class="w-4 h-4"></i> ចាកចេញ
+        </button>
+      </div>
+    </aside>
+
+    <main
+      class="flex-1 flex flex-col h-screen overflow-hidden relative bg-[#f4f7fe] no-print"
+    >
+      <header
+        class="h-[76px] bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10 glass-card"
+      >
+        <div>
+          <h1 id="page-title" class="text-2xl font-bold text-slate-900">
+            ទិដ្ឋភាពទូទៅ (Overview)
+          </h1>
+          <p class="text-sm text-slate-500" id="current-date">
+            ដំណើរការទិន្នន័យថ្ងៃនេះ
+          </p>
+        </div>
+        <div class="flex items-center gap-4">
+          <button
+            class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 relative transition"
+          >
+            <i data-lucide="bell" class="w-5 h-5"></i
+            ><span
+              class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"
+            ></span>
+          </button>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-8 relative">
+        <div id="view-dashboard" class="view-section space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <p class="text-sm font-medium text-slate-500">
+                    វិក្កយបត្រសរុប
+                  </p>
+                  <h3
+                    class="text-3xl font-bold text-slate-900 mt-1"
+                    id="dash-total-bills"
+                  >
+                    0
+                  </h3>
+                </div>
+                <div
+                  class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"
+                >
+                  <i data-lucide="file-text" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <p class="text-sm font-medium text-slate-500">ចំណូលទទួលបាន</p>
+                  <h3
+                    class="text-3xl font-bold text-emerald-600 mt-1"
+                    id="dash-total-revenue"
+                  >
+                    $0.00
+                  </h3>
+                </div>
+                <div
+                  class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"
+                >
+                  <i data-lucide="wallet" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <p class="text-sm font-medium text-slate-500">បំណុលអតិថិជន</p>
+                  <h3
+                    class="text-3xl font-bold text-rose-600 mt-1"
+                    id="dash-unpaid-amount"
+                  >
+                    $0.00
+                  </h3>
+                </div>
+                <div
+                  class="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center"
+                >
+                  <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+            >
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <p class="text-sm font-medium text-slate-500">អតិថិជនសកម្ម</p>
+                  <h3
+                    class="text-3xl font-bold text-indigo-600 mt-1"
+                    id="dash-customers"
+                  >
+                    0
+                  </h3>
+                </div>
+                <div
+                  class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center"
+                >
+                  <i data-lucide="users" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div
+              class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6"
+            >
+              <h2 class="text-lg font-bold text-slate-800 mb-4">
+                របាយការណ៍ចំណូលប្រចាំឆ្នាំ
+              </h2>
+              <canvas id="revenueChart" height="100"></canvas>
+            </div>
+            <div
+              class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6"
+            >
+              <h2 class="text-lg font-bold text-slate-800 mb-4">
+                ស្ថានភាពវិក្កយបត្រ
+              </h2>
+              <canvas id="statusChart" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="view-invoices"
+          class="view-section hidden flex-col lg:flex-row gap-6 h-[calc(100vh-10rem)]"
+        >
+          <div class="w-full lg:w-[350px] shrink-0 overflow-y-auto">
+            <div
+              class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
+            >
+              <div class="px-5 py-4 border-b border-slate-100 bg-white">
+                <h2
+                  class="text-lg font-bold text-slate-800 flex items-center gap-2"
+                >
+                  <i
+                    data-lucide="plus"
+                    class="w-5 h-5 text-indigo-600 bg-indigo-50 rounded-md p-0.5"
+                  ></i>
+                  បង្កើតវិក្កយបត្រ
+                </h2>
+              </div>
+              <div class="p-5">
+                <datalist id="existing-customers"></datalist>
+                <form id="billForm" class="space-y-4">
+                  <div>
+                    <label
+                      class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                      >ក្រុមហ៊ុន (Biller)</label
+                    ><input
+                      type="text"
+                      id="company"
+                      readonly
+                      class="w-full bg-slate-50 border border-slate-200 text-slate-600 font-semibold rounded-lg p-2.5 outline-none cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex justify-between"
+                      ><span>លេខកូដអតិថិជន</span
+                      ><span
+                        class="text-indigo-400 font-normal lowercase text-[10px]"
+                        >(ទុកទទេដើម្បីបង្កើតថ្មី)</span
+                      ></label
+                    >
+                    <div class="flex gap-2">
+                      <input
+                        type="text"
+                        id="consumer_no"
+                        list="existing-customers"
+                        oninput="handleConsumerNoInput()"
+                        placeholder="វាយស្វែងរក ឬ ទុកទទេ..."
+                        class="w-full bg-white border border-slate-300 text-slate-900 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      /><button
+                        type="button"
+                        onclick="generateAutoConsumerNo()"
+                        class="bg-indigo-50 text-indigo-600 px-3 py-2 rounded-lg hover:bg-indigo-100 transition-colors border border-indigo-100"
+                      >
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                      >ឈ្មោះអតិថិជន <span class="text-rose-500">*</span></label
+                    ><input
+                      type="text"
+                      id="customer_name"
+                      required
+                      placeholder="ឈ្មោះ..."
+                      class="w-full bg-white border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                      <label
+                        class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                        >សម្រាប់ខែ <span class="text-rose-500">*</span></label
+                      ><input
+                        type="month"
+                        id="month"
+                        required
+                        class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div class="col-span-1">
+                      <label
+                        class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                        >ថ្ងៃចេញ <span class="text-rose-500">*</span></label
+                      ><input
+                        type="date"
+                        id="issue_date"
+                        required
+                        onchange="updateDueDateOneWeek()"
+                        class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div class="col-span-1">
+                      <label
+                        class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                        >ថ្ងៃផុតកំណត់
+                        <span class="text-rose-500">*</span></label
+                      ><input
+                        type="date"
+                        id="due_date"
+                        required
+                        readonly
+                        class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm outline-none text-gray-500 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="grid grid-cols-2 gap-3 border border-slate-200 rounded-lg p-3 bg-slate-50"
+                  >
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                        >អំណានចាស់</label
+                      ><input
+                        type="number"
+                        id="old_reading"
+                        oninput="calculateAdvancedAmount()"
+                        placeholder="0"
+                        class="w-full bg-white border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                        >អំណានថ្មី</label
+                      ><input
+                        type="number"
+                        id="new_reading"
+                        oninput="calculateAdvancedAmount()"
+                        placeholder="0"
+                        class="w-full bg-white border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                        >បរិមាណប្រើប្រាស់</label
+                      ><input
+                        type="number"
+                        id="usage_details"
+                        oninput="calculateAutoAmount()"
+                        placeholder="0"
+                        class="w-full bg-slate-100 border border-slate-200 text-slate-600 font-semibold rounded-lg p-2.5 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex justify-between"
+                        >តម្លៃឯកតា
+                        <span
+                          id="rate-hint"
+                          class="text-indigo-500"
+                        ></span></label
+                      ><input
+                        type="number"
+                        step="0.01"
+                        id="rate"
+                        readonly
+                        class="w-full bg-slate-50 border border-slate-200 text-slate-600 font-semibold rounded-lg p-2.5 outline-none cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                  <div class="pt-2">
+                    <label
+                      class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
+                      >សរុបប្រាក់ (USD)
+                      <span class="text-rose-500">*</span></label
+                    ><input
+                      type="number"
+                      step="0.01"
+                      id="total_amount_usd"
+                      required
+                      readonly
+                      class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-3 outline-none font-bold text-xl cursor-not-allowed text-center"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    id="submitBtn"
+                    class="w-full text-white bg-indigo-600 hover:bg-indigo-700 font-semibold rounded-lg px-5 py-3 flex items-center justify-center gap-2 mt-4 shadow-lg shadow-indigo-200 transition-all"
+                  >
+                    ចេញវិក្កយបត្រ (Issue Bill)
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-1 flex flex-col h-full">
+            <div
+              class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full"
+            >
+              <div
+                class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white"
+              >
+                <div class="relative w-64">
+                  <i
+                    data-lucide="search"
+                    class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  ></i
+                  ><input
+                    type="text"
+                    id="searchInvoice"
+                    onkeyup="renderInvoices()"
+                    placeholder="ស្វែងរកវិក្កយបត្រ..."
+                    class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+                <button
+                  onclick="fetchData()"
+                  class="text-sm font-semibold text-slate-600 hover:text-indigo-600 flex items-center gap-1.5 transition-colors border border-slate-200 px-3 py-1.5 rounded-lg"
+                >
+                  <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                  ទាញទិន្នន័យថ្មី
+                </button>
+              </div>
+              <div class="overflow-y-auto flex-1">
+                <table class="w-full text-sm text-left">
+                  <thead
+                    class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 z-10 border-b border-slate-100"
+                  >
+                    <tr>
+                      <th class="px-5 py-3 font-semibold">លេខរៀង (Bill ID)</th>
+                      <th class="px-5 py-3 font-semibold">អតិថិជន</th>
+                      <th class="px-5 py-3 font-semibold">ខែ</th>
+                      <th class="px-5 py-3 font-semibold">ទឹកប្រាក់</th>
+                      <th class="px-5 py-3 font-semibold">ស្ថានភាព</th>
+                      <th class="px-5 py-3 font-semibold text-right">
+                        សកម្មភាព
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="invoices-table"
+                    class="divide-y divide-slate-100"
+                  ></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="view-bulk"
+          class="view-section hidden flex-col h-[calc(100vh-10rem)]"
+        >
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-100 flex-1 flex flex-col overflow-hidden"
+          >
+            <div
+              class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center"
+            >
+              <div>
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                  <i data-lucide="table-2" class="w-5 h-5 text-emerald-500"></i>
+                  បញ្ចូលទិន្នន័យរហ័ស
+                </h2>
+                <p class="text-xs text-slate-500 mt-1" id="bulk-subtitle">
+                  ទម្រង់បញ្ចូលទិន្នន័យ
+                </p>
+              </div>
+              <div class="flex items-center gap-3">
+                <input
+                  type="month"
+                  id="bulk-global-month"
+                  onchange="updateAllBulkMonths()"
+                  class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                /><button
+                  id="btn-auto-generate"
+                  onclick="autoGenerateFixedBills()"
+                  class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2"
+                >
+                  <i data-lucide="zap" class="w-4 h-4"></i>
+                  បង្កើតវិក្កយបត្រស្វ័យប្រវត្តិ
+                </button>
+              </div>
+            </div>
+            <div class="overflow-y-auto flex-1">
+              <table class="w-full text-sm text-left text-slate-500 relative">
+                <thead
+                  class="text-xs text-slate-700 uppercase bg-slate-50/80 border-b border-slate-100 sticky top-0 z-10"
+                  id="bulk-table-head"
+                ></thead>
+                <tbody
+                  id="bulk-table-body"
+                  class="divide-y divide-slate-100"
+                ></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-customers" class="view-section hidden">
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
+          >
+            <div
+              class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center"
+            >
+              <div>
+                <h2 class="text-lg font-semibold">បញ្ជីអតិថិជន</h2>
+                <p class="text-sm text-slate-500">
+                  គ្រប់គ្រង និងតាមដានអតិថិជនរបស់អ្នក
+                </p>
+              </div>
+              <select
+                id="filter-status"
+                onchange="renderCustomers()"
+                class="bg-white border border-slate-200 text-sm rounded-lg focus:ring-indigo-500 p-2 outline-none"
+              >
+                <option value="All">គ្រប់ស្ថានភាព (All)</option>
+                <option value="Debt">ជំពាក់ប្រាក់ (Unpaid)</option>
+                <option value="NoDebt">មិនជំពាក់ (Paid)</option>
+              </select>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left text-slate-500">
+                <thead
+                  class="text-xs text-slate-700 uppercase bg-slate-50/80 border-b border-slate-100"
+                >
+                  <tr>
+                    <th class="px-6 py-4 font-semibold">លេខកូដ</th>
+                    <th class="px-6 py-4 font-semibold">ឈ្មោះ</th>
+                    <th class="px-6 py-4 font-semibold">វិក្កយបត្រសរុប</th>
+                    <th class="px-6 py-4 font-semibold">ជំពាក់សរុប</th>
+                    <th class="px-6 py-4 font-semibold text-right">សកម្មភាព</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="customers-table"
+                  class="divide-y divide-slate-100"
+                ></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div
+      id="slip-modal"
+      class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity p-2 sm:p-4"
+    >
+      <div
+        id="slip-modal-container"
+        class="bg-white rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[95vh] overflow-hidden edc-font"
+      >
+        <div
+          class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center no-print shrink-0"
+        >
+          <h3 class="font-bold flex items-center gap-2 text-lg">
+            <i data-lucide="printer" class="w-5 h-5"></i> បោះពុម្ពវិក្កយបត្រ (A4
+            Print Preview)
+          </h3>
+          <button
+            onclick="closeModal('slip-modal')"
+            class="hover:bg-rose-500 hover:text-white rounded-full p-1.5 transition text-slate-300"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div
+          class="overflow-y-auto flex-1 bg-gray-300 p-4 flex justify-center no-print-bg"
+        >
+          <div class="scale-wrapper">
+            <div
+              id="slip-print-area"
+              class="a4-paper relative shadow-sm text-[#005bb5]"
+            >
+              <div
+                class="flex justify-between items-start mb-2 border-b-2 border-blue-500 pb-2"
+              >
+                <div
+                  class="w-1/4 flex flex-col items-center justify-center pt-2"
+                >
+                  <div
+                    class="w-16 h-16 border-[3px] border-blue-600 rounded-full flex items-center justify-center font-bold text-blue-600 text-3xl edc-font-moul shadow-sm bg-white"
+                    id="slip-dynamic-logo-letter"
+                  >
+                    C
+                  </div>
+                </div>
+                <div class="text-center w-2/4 pt-1">
+                  <h1
+                    class="text-3xl edc-font-moul text-blue-700 tracking-wider mb-1 mt-2"
+                    id="slip-dynamic-company-kh"
+                  >
+                    ឈ្មោះក្រុមហ៊ុន
+                  </h1>
+                  <h2
+                    class="text-[12px] font-bold tracking-[0.15em] text-blue-700 font-serif"
+                    id="slip-dynamic-company-en"
+                  >
+                    COMPANY NAME
+                  </h2>
+                </div>
+                <div
+                  class="text-center w-1/4 flex flex-col items-center justify-start pt-2 relative"
+                >
+                  <p
+                    class="mb-0 text-black font-semibold text-[12px] font-mono w-full text-center"
+                  >
+                    INV/<span id="edc-inv">...</span>
+                  </p>
+                  <img
+                    id="edc-bc-top"
+                    class="h-10 w-full max-w-[160px] object-contain px-2 rounded"
+                    src=""
+                    alt="Barcode Top"
+                  />
+                </div>
+              </div>
+              <div
+                class="text-center text-[10px] mb-3 text-black font-semibold"
+              >
+                សាខាមុខសែនត្បូង សង្កាត់ទឹកល្អក់ទី ៣ ខណ្ឌទួលគោក រាជធានីភ្នំពេញ
+                <br />Hotline Tel: 068 333 266 / 061 333 266 / 086 333 266
+              </div>
+              <div class="flex gap-3 mb-3">
+                <div
+                  class="w-[55%] border border-blue-500 rounded-sm p-3 relative mt-2 bg-blue-50/10 overflow-hidden"
+                >
+                  <div
+                    class="absolute -top-2.5 left-4 bg-white px-2 text-[11px] font-bold text-blue-600"
+                  >
+                    អាសយដ្ឋានទទួលវិក្កយបត្រ
+                  </div>
+                  <h3
+                    class="font-bold text-black text-[16px] mb-1 edc-font-moul text-blue-900 break-words max-w-full"
+                    id="edc-name"
+                  >
+                    ឈ្មោះអតិថិជន
+                  </h3>
+                  <p class="text-[11px] text-gray-700 leading-tight truncate">
+                    រាជធានីភ្នំពេញ ប្រទេសកម្ពុជា
+                  </p>
+                </div>
+                <div
+                  class="w-[45%] text-[11px] grid grid-cols-[45%_55%] gap-y-1 p-2 bg-blue-50/30 border border-blue-200 rounded overflow-hidden"
+                >
+                  <div class="text-blue-600 font-semibold">
+                    ថ្ងៃធ្វើវិក្កយបត្រ
+                  </div>
+                  <div
+                    class="text-black text-right font-bold font-mono"
+                    id="edc-date"
+                  >
+                    ...
+                  </div>
+                  <div class="text-blue-600 font-semibold">
+                    លេខសម្គាល់អតិថិជន <span class="text-[9px]">ID</span>
+                  </div>
+                  <div
+                    class="text-black text-right font-bold text-[13px] text-blue-800 font-mono truncate"
+                    id="edc-cid"
+                  >
+                    ...
+                  </div>
+                  <div class="text-blue-600 font-semibold">
+                    ទីតាំង <span class="text-[9px]">LOCATION</span>
+                  </div>
+                  <div class="text-black text-right truncate">492-6005 RD</div>
+                  <div class="text-blue-600 font-semibold">ប្រភេទអតិថិជន</div>
+                  <div
+                    class="text-black text-right text-[9px] uppercase leading-tight font-medium truncate"
+                  >
+                    3Phx100A RIEL
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-3 h-[450px]">
+                <div class="w-[40%] flex flex-col gap-3">
+                  <div
+                    class="border border-blue-500 text-[10px] p-2 flex flex-col bg-white overflow-hidden"
+                  >
+                    <div
+                      class="text-center font-bold text-blue-700 border-b border-blue-300 pb-1 mb-2"
+                    >
+                      ប្រវត្តិប្រើប្រាស់ ១២ខែចុងក្រោយ
+                    </div>
+                    <div
+                      id="slip-history-grid"
+                      class="grid grid-cols-4 gap-x-2 gap-y-1 text-gray-800 font-medium h-[180px] overflow-hidden font-mono"
+                    ></div>
+                    <div
+                      class="flex justify-between border-t border-blue-300 mt-2 pt-2 font-bold text-black text-[11px]"
+                    >
+                      <span class="text-blue-800">ប្រើប្រាស់ជាមធ្យមខែនេះ</span
+                      ><span id="slip-avg-usage" class="text-blue-600 font-mono"
+                        >0kWh</span
+                      >
+                    </div>
+                    <div
+                      class="h-24 border border-gray-300 mt-3 relative p-1 bg-gray-50 rounded"
+                    >
+                      <svg
+                        class="w-full h-full opacity-50"
+                        viewBox="0 0 100 40"
+                        preserveAspectRatio="none"
+                        id="history-chart-svg"
+                      >
+                        <polyline
+                          points="0,30 10,25 20,20 30,10 40,25 50,15 60,15 70,25 80,10 90,20 100,25"
+                          fill="none"
+                          stroke="#004890"
+                          stroke-width="1"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div
+                    class="border border-blue-500 text-[10px] p-2 text-gray-800 bg-blue-50/30 flex-1 leading-relaxed rounded-sm overflow-hidden"
+                  >
+                    <span class="font-bold text-rose-600">* ចំណាំ៖</span>
+                    ក្នុងករណីអតិថិជនមិនបានបង់ប្រាក់តាមការកំណត់
+                    ក្រុមហ៊ុននឹងផ្អាកការផ្គត់ផ្គង់ថាមពលជាបណ្តោះអាសន្ន។
+                    ការភ្ជាប់ចរន្តប្រើវិញលុះត្រាតែបានបង់បំណុលសរុប។<br />
+                    <span class="font-bold text-blue-600 mt-1 block"
+                      >អតិថិជនអាចបង់ប្រាក់ដោយផ្ទាល់តាមរយៈកម្មវិធីធនាគារ U-PAY
+                      Mobile App បានយ៉ាងងាយស្រួល។</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="w-[60%] border border-blue-500 flex flex-col relative text-[11px] bg-white overflow-hidden"
+                >
+                  <div class="p-3 border-b border-blue-300 bg-blue-50/20">
+                    <div class="flex justify-between items-center mb-1">
+                      <span class="font-semibold text-blue-800"
+                        >ស្ថានភាពបំណុលចាស់ (1)</span
+                      ><span class="font-bold text-black text-[12px] font-mono"
+                        >0 ៛</span
+                      >
+                    </div>
+                    <div
+                      class="flex justify-between text-gray-500 mb-2 text-[10px]"
+                    >
+                      <span
+                        >បំណុលសរុបគិតត្រឹមថ្ងៃទី
+                        <span id="edc-date2" class="font-mono"></span
+                      ></span>
+                    </div>
+                    <div
+                      class="mt-2 font-bold text-black flex justify-between bg-yellow-50 p-1.5 rounded border border-yellow-200"
+                    >
+                      <span
+                        >ចំនួន និងថ្លៃការប្រើប្រាស់ថ្មី (សម្រាប់ខែ
+                        <span
+                          id="edc-month"
+                          class="underline text-blue-700 font-mono"
+                          >...</span
+                        >)</span
+                      ><span class="text-blue-700">(2)</span>
+                    </div>
+                  </div>
+                  <table
+                    class="w-full text-center text-[10px] mb-2 border-collapse mt-2 table-fixed"
+                  >
+                    <thead>
+                      <tr
+                        class="text-blue-700 border-b-2 border-blue-300 uppercase bg-blue-50/50"
+                      >
+                        <th class="p-1.5 border-r border-blue-200 font-bold">
+                          ចាស់
+                        </th>
+                        <th class="p-1.5 border-r border-blue-200 font-bold">
+                          ថ្មី
+                        </th>
+                        <th class="p-1.5 border-r border-blue-200 font-bold">
+                          មេគុណ
+                        </th>
+                        <th class="p-1.5 border-r border-blue-200 font-bold">
+                          បរិមាណ
+                        </th>
+                        <th class="p-1.5 border-r border-blue-200 font-bold">
+                          តម្លៃ
+                        </th>
+                        <th class="p-1.5 font-bold">តម្លៃសរុប</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-gray-800 font-mono">
+                      <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td
+                          class="p-2 border-r border-gray-200 text-[11px]"
+                          id="edc-old-read"
+                        >
+                          ...
+                        </td>
+                        <td
+                          class="p-2 border-r border-gray-200 text-[11px]"
+                          id="edc-new-read"
+                        >
+                          ...
+                        </td>
+                        <td
+                          class="p-2 border-r border-gray-200 font-sans text-xs"
+                        >
+                          1
+                        </td>
+                        <td
+                          class="p-2 border-r border-gray-200 font-bold text-blue-600 text-[12px]"
+                          id="edc-qty"
+                        >
+                          ...
+                        </td>
+                        <td
+                          class="p-2 border-r border-gray-200 text-[11px]"
+                          id="edc-rate-table"
+                        >
+                          ...
+                        </td>
+                        <td
+                          class="p-2 text-right pr-3 font-bold text-black text-[12px]"
+                          id="edc-subtotal"
+                        >
+                          ...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div
+                    class="flex justify-between px-3 mt-4 font-bold text-[13px] text-black border-t-2 border-blue-500 pt-2 w-[90%] mx-auto bg-blue-50 rounded-lg p-2 shadow-sm"
+                  >
+                    <span class="edc-font-moul tracking-widest text-[#004890]"
+                      >សរុប</span
+                    ><span
+                      id="edc-total-mid"
+                      class="text-[14px] font-mono text-right"
+                      >...</span
+                    >
+                  </div>
+
+                  <div
+                    class="absolute bottom-4 left-0 right-0 flex flex-col items-center justify-center z-10 w-full h-36"
+                  >
+                    <div
+                      class="w-32 h-32 border-[1.5px] border-dashed border-blue-400 rounded-full flex items-center justify-center pointer-events-none opacity-25 mix-blend-multiply absolute"
+                    >
+                      <svg
+                        viewBox="0 0 100 100"
+                        class="w-full h-full animate-[spin_35s_linear_infinite]"
+                      >
+                        <path
+                          id="curve-print"
+                          fill="transparent"
+                          d="M 10 50 A 40 40 0 1 1 90 50 A 40 40 0 1 1 10 50"
+                        />
+                        <text width="500">
+                          <textPath
+                            href="#curve-print"
+                            startOffset="50%"
+                            text-anchor="middle"
+                            class="text-[9.5px] tracking-widest fill-[#004890] font-bold uppercase"
+                            id="stamp-circular-company"
+                          >
+                            PAYHUB GATEWAY
+                          </textPath>
+                        </text>
+                      </svg>
+                    </div>
+                    <span
+                      class="edc-font-moul text-[19px] text-blue-800 z-10 bg-white/70 px-3 rounded shadow-sm relative mt-2"
+                      >ទរនី អាល់ហាទី</span
+                    >
+                    <span
+                      class="font-bold text-[13px] tracking-widest mt-1 mb-1 text-blue-900 z-10 bg-white/70 px-2 rounded font-mono"
+                      id="edc-stamp-date"
+                      >...</span
+                    >
+                    <span
+                      class="text-[#004890] tracking-wider text-[11px] font-bold border-t border-dashed border-[#004890] pt-1 mt-1 z-10 w-1/2 text-center"
+                      >BY: ...........................</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="border border-blue-500 flex flex-col text-[13px] bg-white mt-3 rounded-sm overflow-hidden shadow-sm"
+              >
+                <div
+                  class="flex justify-between items-center p-2.5 border-b border-blue-500 bg-blue-50/50"
+                >
+                  <span class="text-blue-800 font-bold pl-1"
+                    >បំណុលសរុប (Total Debt)</span
+                  ><span
+                    class="font-bold text-black pr-2 text-[14px] font-mono"
+                    id="edc-total1"
+                    >...</span
+                  >
+                </div>
+                <div class="flex h-[65px]">
+                  <div
+                    class="w-[50%] bg-[#005bb5] text-white px-4 flex justify-between items-center border-b border-white"
+                  >
+                    <div class="flex flex-col justify-center">
+                      <div
+                        class="font-bold text-[17px] edc-font-moul tracking-wide mt-1"
+                      >
+                        ទឹកប្រាក់ត្រូវទូទាត់
+                      </div>
+                      <div class="text-[12px] font-mono text-blue-200">
+                        (1) + (2)
+                      </div>
+                    </div>
+                    <img
+                      id="edc-qr"
+                      src=""
+                      class="w-14 h-14 bg-white p-1 rounded-lg object-cover shadow-md"
+                      alt="QR"
+                    />
+                  </div>
+                  <div
+                    class="w-[50%] bg-blue-50 flex items-center justify-end pr-4 border-b border-blue-500 font-mono"
+                  >
+                    <span
+                      class="text-[20px] font-bold text-blue-900"
+                      id="edc-total-main"
+                      >...</span
+                    >
+                  </div>
+                </div>
+                <div class="flex text-[12px]">
+                  <div
+                    class="w-[50%] bg-[#005bb5] text-white px-4 py-1.5 flex items-center font-medium border-r border-white"
+                  >
+                    ថ្ងៃផុតកំណត់បង់ប្រាក់
+                  </div>
+                  <div
+                    class="w-[50%] text-right pr-4 py-1.5 bg-blue-50 text-rose-600 font-bold font-mono"
+                    id="edc-due1"
+                  >
+                    ...
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="border-t-[2px] border-dashed border-gray-400 pt-8 mt-12 relative"
+              >
+                <span
+                  class="absolute -top-3 left-[5%] bg-white px-3 text-[11px] text-gray-500 flex items-center gap-1 font-bold border border-gray-200 rounded-full shadow-sm"
+                  ><i data-lucide="scissors" class="w-3 h-3"></i> កាត់ត្រង់នេះ
+                  (Tear Here)</span
+                >
+
+                <div
+                  class="border-2 border-blue-500 flex text-[12px] bg-white rounded-lg overflow-hidden shadow-sm"
+                >
+                  <div
+                    class="w-[43%] flex flex-col p-3 border-r-2 border-blue-500 justify-center gap-2 bg-blue-50/30 overflow-hidden"
+                  >
+                    <div
+                      class="flex items-center text-blue-800 font-bold justify-between px-1"
+                    >
+                      <span>អតិថិជន ID</span
+                      ><span
+                        class="text-black text-[13px] bg-blue-100 px-2 py-0.5 rounded font-mono truncate max-w-[130px]"
+                        id="edc-cid2"
+                        >...</span
+                      >
+                    </div>
+                    <img
+                      id="edc-bc-bot"
+                      class="h-12 w-[95%] mx-auto object-contain py-1"
+                      src=""
+                      alt="Barcode Bottom"
+                    />
+                    <div
+                      class="flex justify-between items-center mt-1 font-bold px-1 overflow-hidden"
+                    >
+                      <span class="text-blue-800 shrink-0">អតិថិជន</span
+                      ><span
+                        class="text-black edc-font-moul text-[12px] text-blue-900 break-words text-right flex-1 ml-2 max-w-[150px] truncate"
+                        id="edc-name2"
+                        >...</span
+                      >
+                    </div>
+                  </div>
+                  <div class="w-[57%] flex flex-col bg-white">
+                    <div class="flex border-b-2 border-blue-500 h-[45px]">
+                      <div
+                        class="w-[50%] bg-[#005bb5] text-white flex items-center px-3 font-bold text-[14px]"
+                      >
+                        ទឹកប្រាក់ត្រូវទូទាត់
+                      </div>
+                      <div
+                        class="w-[50%] flex items-end justify-center pr-3 pt-0.5 bg-blue-50 leading-tight font-mono text-right font-bold"
+                        id="edc-total3"
+                      ></div>
+                    </div>
+                    <div class="flex flex-1 border-b border-blue-200">
+                      <div
+                        class="w-[50%] bg-[#005bb5] text-blue-100 flex items-center px-3 text-[11px] border-t border-blue-400"
+                      >
+                        ថ្ងៃផុតកំណត់បង់ប្រាក់
+                      </div>
+                      <div
+                        class="w-[50%] flex items-center justify-end pr-3 text-rose-600 font-bold text-[12px] font-mono"
+                        id="id-due-bot-label"
+                      >
+                        ...
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="p-4 bg-white border-t border-slate-200 flex justify-center gap-4 no-print shrink-0"
+        >
+          <button
+            onclick="closeModal('slip-modal')"
+            class="px-8 py-3 bg-slate-100 border border-slate-300 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition shadow-sm w-44"
+          >
+            បិទ (Close)
+          </button>
+          <button
+            onclick="window.print()"
+            class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200 flex justify-center items-center gap-2 w-44"
+          >
+            <i data-lucide="printer" class="w-5 h-5"></i> បោះពុម្ព (Print)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="edit-form-modal"
+      class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+      >
+        <div
+          class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-amber-50"
+        >
+          <h3
+            class="font-bold text-amber-700 flex items-center gap-2"
+            id="edit-modal-title"
+          >
+            <i data-lucide="edit" class="w-5 h-5"></i> កែប្រែ
+          </h3>
+          <button
+            onclick="closeModal('edit-form-modal')"
+            class="hover:bg-amber-100 text-amber-600 rounded-full p-1"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="p-6">
+          <form id="unifiedEditForm" class="space-y-4">
+            <input type="hidden" id="edit_type" />
+            <input type="hidden" id="edit_id" />
+            <div id="edit-group-customer" class="space-y-4">
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  id="edit-label-1"
+                  >ឈ្មោះអតិថិជន</label
+                ><input
+                  type="text"
+                  id="edit_field_1"
+                  required
+                  class="w-full bg-white border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            </div>
+            <div id="edit-group-bill" class="space-y-4 hidden">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                    >សម្រាប់ខែ</label
+                  ><input
+                    type="month"
+                    id="edit_field_2"
+                    class="w-full bg-white border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                    >បរិមាណប្រើប្រាស់</label
+                  ><input
+                    type="number"
+                    id="edit_field_3"
+                    oninput="calcEditBillAmount()"
+                    class="w-full bg-white border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+              <div class="pt-2">
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >សរុបប្រាក់ (USD) លោតអូតូ</label
+                ><input
+                  type="number"
+                  step="0.01"
+                  id="edit_field_4"
+                  readonly
+                  class="w-full bg-amber-50 border border-amber-200 text-amber-700 rounded-lg p-3 outline-none font-bold text-xl cursor-not-allowed text-center"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              id="btnUnifiedSave"
+              class="w-full text-white bg-amber-600 hover:bg-amber-700 font-semibold rounded-lg px-5 py-3 flex items-center justify-center gap-2 mt-4 shadow-md transition-all"
+            >
+              <i data-lucide="save" class="w-4 h-4"></i> រក្សាទុកការកែប្រែ
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div
+      id="toast-container"
+      class="fixed bottom-6 right-6 z-[70] flex flex-col gap-3 pointer-events-none"
+    ></div>
+
+    <script>
+      let allBillsData = [];
+      let revenueChartInstance = null;
+      let statusChartInstance = null;
+      const API_URL = window.location.protocol.includes("http")
+        ? "/api/bills"
+        : "http://localhost:4000/api/bills";
+
+      const safeStr = (val) => (val || "").toString().toLowerCase();
+      function escapeHtml(str) {
+        return (str || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+      }
+
+      // 1. ស្វ័យប្រវត្តិកំណត់ថ្ងៃផុតកំណត់ ១អាទិត្យក្រោយថ្ងៃចេញ
+      function updateDueDateOneWeek() {
+        const issueDateVal = document.getElementById("issue_date").value;
+        if (issueDateVal) {
+          const issueDate = new Date(issueDateVal);
+          const dueDate = new Date(issueDate);
+          dueDate.setDate(issueDate.getDate() + 7);
+          document.getElementById("due_date").value = dueDate
+            .toISOString()
+            .split("T")[0];
+        }
+      }
+
+      function generateAutoConsumerNo() {
+        const random8Digits = Math.floor(10000000 + Math.random() * 90000000);
+        document.getElementById("consumer_no").value = "CUS" + random8Digits;
+        handleConsumerNoInput();
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("company").value =
+          session.company || "Unknown Biller";
+        document.getElementById("sidebar-company-name").textContent =
+          session.company || "Unknown Biller";
+        document.getElementById("sidebar-email").textContent = session.email;
+        document.getElementById("sidebar-avatar").textContent = (
+          session.company || "C"
+        )
+          .charAt(0)
+          .toUpperCase();
+        document.getElementById("current-date").textContent =
+          new Date().toLocaleDateString("km-KH", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+
+        const today = new Date();
+        if (document.getElementById("issue_date"))
+          document.getElementById("issue_date").value = today
+            .toISOString()
+            .split("T")[0];
+        updateDueDateOneWeek();
+
+        calculateAdvancedAmount();
+        fetchData();
+
+        const lastTab =
+          localStorage.getItem("payhub_current_tab") || "dashboard";
+        switchView(lastTab);
+
+        // Auto Silent Refresh every 4 seconds
+        setInterval(async () => {
+          try {
+            const res = await fetch(
+              `${API_URL}?company=${encodeURIComponent(session.company)}`,
+            );
+            if (res.ok) {
+              const newData = await res.json();
+              if (JSON.stringify(allBillsData) !== JSON.stringify(newData)) {
+                allBillsData = newData;
+                processAllData();
+              }
+            }
+          } catch (e) {}
+        }, 4000);
+      });
+
+      function switchView(view) {
+        ["dashboard", "invoices", "bulk", "customers"].forEach((v) => {
+          let el = document.getElementById(`view-${v}`);
+          if (el) {
+            el.classList.remove("flex");
+            el.classList.add("hidden");
+          }
+          document
+            .getElementById(`nav-${v}`)
+            .classList.replace("nav-active", "nav-inactive");
+        });
+        let target = document.getElementById(`view-${view}`);
+        if (target) {
+          target.classList.remove("hidden");
+          if (view === "invoices" || view === "bulk")
+            target.classList.add("flex");
+        }
+        document
+          .getElementById(`nav-${view}`)
+          .classList.replace("nav-inactive", "nav-active");
+
+        const viewTitles = {
+          dashboard: "ទិដ្ឋភាពទូទៅ (Overview)",
+          invoices: "គ្រប់គ្រងវិក្កយបត្រ (Invoices)",
+          bulk: "បញ្ជូលទិន្នន័យ (Bulk Entry)",
+          customers: "អតិថិជន (Customers)",
+        };
+        document.getElementById("page-title").textContent = viewTitles[view];
+        localStorage.setItem("payhub_current_tab", view);
+      }
+
+      function logout() {
+        Swal.fire({
+          title: "ចាកចេញពីប្រព័ន្ធ?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#ef4444",
+          cancelButtonColor: "#cbd5e1",
+          confirmButtonText: "ចាកចេញ",
+          cancelButtonText: "បោះបង់",
+        }).then((res) => {
+          if (res.isConfirmed) {
+            localStorage.removeItem("payhub_session");
+            window.location.href = "login.html";
+          }
+        });
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).classList.add("hidden");
+      }
+
+      async function fetchData() {
+        try {
+          const res = await fetch(
+            `${API_URL}?company=${encodeURIComponent(session.company)}`,
+          );
+          if (!res.ok) throw new Error("Network Error");
+          allBillsData = await res.json();
+          processAllData();
+        } catch (error) {
+          console.warn("Fetch Error", error);
+          processAllData();
+        }
+      }
+
+      function processAllData() {
+        try {
+          updateCustomerDatalist();
+        } catch (e) {}
+        try {
+          renderDashboard();
+        } catch (e) {}
+        try {
+          renderInvoices();
+        } catch (e) {}
+        try {
+          renderBulkTable();
+        } catch (e) {}
+        try {
+          renderCustomers();
+        } catch (e) {}
+        try {
+          lucide.createIcons();
+        } catch (e) {}
+      }
+
+      function renderDashboard() {
+        const paid = allBillsData.filter((b) => b.status === "Paid");
+        const unpaid = allBillsData.filter((b) => b.status === "Unpaid");
+        const rev = paid.reduce(
+          (s, b) => s + (Number(b.total_amount_usd) || 0),
+          0,
+        );
+        const debt = unpaid.reduce(
+          (s, b) => s + (Number(b.total_amount_usd) || 0),
+          0,
+        );
+        const uniqueCustomers = new Set(
+          allBillsData.map((b) => b.consumer_no).filter(Boolean),
+        ).size;
+
+        document.getElementById("dash-total-bills").textContent =
+          allBillsData.length;
+        document.getElementById("dash-total-revenue").textContent =
+          `$${rev.toFixed(2)}`;
+        document.getElementById("dash-unpaid-amount").textContent =
+          `$${debt.toFixed(2)}`;
+        document.getElementById("dash-customers").textContent = uniqueCustomers;
+
+        const monthlyRev = {};
+        paid.forEach((b) => {
+          const m = b.month || "Unknown";
+          monthlyRev[m] = (monthlyRev[m] || 0) + Number(b.total_amount_usd);
+        });
+        const sortedMonths = Object.keys(monthlyRev).sort().slice(-6);
+        const chartLabels = sortedMonths.map((m) =>
+          m.split("-").reverse().join("/"),
+        );
+        const chartData = sortedMonths.map((m) => monthlyRev[m]);
+
+        if (typeof Chart !== "undefined") {
+          const ctxRev = document.getElementById("revenueChart");
+          if (ctxRev) {
+            if (revenueChartInstance) revenueChartInstance.destroy();
+            revenueChartInstance = new Chart(ctxRev.getContext("2d"), {
+              type: "bar",
+              data: {
+                labels: chartLabels.length ? chartLabels : ["No Data"],
+                datasets: [
+                  {
+                    label: "ចំណូល (USD)",
+                    data: chartData.length ? chartData : [0],
+                    backgroundColor: "#4f46e5",
+                    borderRadius: 6,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                  y: { beginAtZero: true, grid: { display: false } },
+                  x: { grid: { display: false } },
+                },
+              },
+            });
+          }
+          const ctxStatus = document.getElementById("statusChart");
+          if (ctxStatus) {
+            const hasData = paid.length > 0 || unpaid.length > 0;
+            if (statusChartInstance) statusChartInstance.destroy();
+            statusChartInstance = new Chart(ctxStatus.getContext("2d"), {
+              type: "doughnut",
+              data: {
+                labels: ["បានទូទាត់ (Paid)", "រង់ចាំ (Unpaid)"],
+                datasets: [
+                  {
+                    data: [hasData ? paid.length : 1, unpaid.length],
+                    backgroundColor: [
+                      hasData ? "#10b981" : "#e2e8f0",
+                      "#f43f5e",
+                    ],
+                    borderWidth: 0,
+                    cutout: "75%",
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                plugins: { legend: { position: "bottom" } },
+              },
+            });
+          }
+        }
+      }
+
+      function renderInvoices() {
+        const searchEl = document.getElementById("searchInvoice");
+        const term = (searchEl ? searchEl.value : "").toLowerCase();
+        const filtered = [...allBillsData]
+          .reverse()
+          .filter(
+            (b) =>
+              safeStr(b.customer_name).includes(term) ||
+              safeStr(b.bill_id).includes(term) ||
+              safeStr(b.consumer_no).includes(term),
+          );
+
+        document.getElementById("invoices-table").innerHTML =
+          filtered
+            .map((b) => {
+              const isPaid = b.status === "Paid";
+              const statusBadge = isPaid
+                ? `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1 w-max"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Paid</span>`
+                : `<span class="bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1 w-max"><div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Unpaid</span>`;
+              return `
+            <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
+              <td class="px-5 py-4"><span class="font-bold text-indigo-600">${b.bill_id || "N/A"}</span></td>
+              <td class="px-5 py-4"><div class="font-bold text-slate-800 break-all max-w-[180px]">${b.customer_name || "មិនមានឈ្មោះ"}</div><div class="text-xs text-slate-500 flex items-center gap-1 mt-0.5 font-mono"><i data-lucide="hash" class="w-3 h-3"></i> ${b.consumer_no || "N/A"}</div></td>
+              <td class="px-5 py-4 font-medium text-slate-600 font-mono">${b.month || ""}</td>
+              <td class="px-5 py-4 font-bold text-slate-900 font-mono">$${Number(b.total_amount_usd || 0).toFixed(2)}</td>
+              <td class="px-5 py-4">${statusBadge}</td>
+              <td class="px-5 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <button onclick="showSlip('${b.bill_id}')" class="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition" title="វិក្កយបត្រ (Slip)"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                  <button onclick="openEditModal('bill', '${b.bill_id}')" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition" title="កែប្រែ (Edit)"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                  <button onclick="deleteAction('bill', '${b.bill_id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition" title="លុប (Delete)"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+              </td>
+            </tr>`;
+            })
+            .join("") ||
+          `<tr><td colspan="6" class="text-center py-12 text-slate-400">មិនមានទិន្នន័យ</td></tr>`;
+      }
+
+      function showSlip(billId) {
+        const billInfo = allBillsData.find((b) => b.bill_id === billId);
+        if (!billInfo) return showToast("រកមិនឃើញវិក្កយបត្រនេះទេ", "error");
+
+        const companyName = session.company || "PAYHUB KH";
+        const consumerNo = billInfo.consumer_no;
+        const amount = Number(billInfo.total_amount_usd) || 0;
+        const rate = Number(billInfo.rate || session.rate) || 0;
+        const qty = Number(billInfo.usage_details) || 0;
+
+        document.getElementById("slip-dynamic-company-kh").textContent =
+          companyName;
+        document.getElementById("slip-dynamic-company-en").textContent =
+          companyName.toUpperCase();
+        document.getElementById("slip-dynamic-logo-letter").textContent =
+          companyName.charAt(0).toUpperCase();
+        document.getElementById("stamp-circular-company").textContent =
+          companyName.toUpperCase() + " SERVICE";
+
+        // Invoice number should be fully visible over the barcode
+        document.getElementById("edc-inv").textContent = billId.replace(
+          "INV-",
+          "",
+        );
+
+        document.getElementById("edc-name").textContent =
+          billInfo.customer_name;
+        document.getElementById("edc-name2").textContent =
+          billInfo.customer_name;
+        document.getElementById("edc-cid").textContent = consumerNo;
+        document.getElementById("edc-cid2").textContent = consumerNo;
+        document.getElementById("edc-month").textContent = billInfo.month;
+
+        const issueDateObj = billInfo.issue_date
+          ? new Date(billInfo.issue_date)
+          : new Date();
+        const dateStr = issueDateObj.toLocaleDateString("en-GB");
+        document.getElementById("edc-date").textContent = dateStr;
+        document.getElementById("edc-date2").textContent = dateStr;
+
+        const dueDateObj = billInfo.due_date
+          ? new Date(billInfo.due_date)
+          : new Date(
+              new Date(issueDateObj).setDate(issueDateObj.getDate() + 7),
+            );
+        const dueDateStr = dueDateObj.toLocaleDateString("en-GB");
+        document.getElementById("edc-due1").textContent = dueDateStr;
+        document.getElementById("edc-due2").textContent = dueDateStr;
+        document.getElementById("id-due-bot-label").textContent = dueDateStr;
+
+        document.getElementById("edc-stamp-date").textContent = issueDateObj
+          .toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
+          .toUpperCase();
+
+        const oldRead = Number(billInfo.old_reading) || 0;
+        const newRead = Number(billInfo.new_reading) || oldRead + qty;
+        document.getElementById("edc-old-read").textContent = oldRead
+          .toString()
+          .padStart(7, "0");
+        document.getElementById("edc-new-read").textContent = newRead
+          .toString()
+          .padStart(7, "0");
+        document.getElementById("edc-qty").textContent = qty.toLocaleString();
+        document.getElementById("edc-rate-table").textContent = `${rate}`;
+
+        const totalRiel = Math.round(amount * 4000).toLocaleString();
+        document.getElementById("edc-subtotal").textContent = `${totalRiel} ៛`;
+        document.getElementById("edc-total-mid").textContent = `${totalRiel} ៛`;
+        document.getElementById("edc-total1").textContent = `${totalRiel} ៛`;
+
+        // ដាក់ទាំងដុល្លារ ទាំងរៀល ផ្តេកគ្នា
+        document.getElementById("edc-total-main").innerHTML =
+          `<span class="text-[#004890] mr-1">$${amount.toFixed(2)}</span> / <span class="ml-1">${totalRiel} ៛</span>`;
+        document.getElementById("edc-total3").innerHTML =
+          `<span class="text-[#004890] text-[15px] font-bold block">$${amount.toFixed(2)}</span><span class="text-[12px] block text-slate-500">${totalRiel} ៛</span>`;
+
+        // 🔥 ប្រវត្តិប្រើប្រាស់ ១២ខែចុងក្រោយ (រៀបតាមខែ)
+        const historyGrid = document.getElementById("slip-history-grid");
+        let customerBills = allBillsData
+          .filter(
+            (b) => b.consumer_no === consumerNo && b.month <= billInfo.month,
+          )
+          .sort((a, b) => (b.month || "").localeCompare(a.month || "")); // តម្រៀបពីថ្មីទៅចាស់
+
+        let historyHtml = "";
+        let totalUsage = 0;
+        let count = 0;
+        let points = [];
+
+        for (let i = 0; i < 12; i++) {
+          if (i < customerBills.length) {
+            const b = customerBills[i];
+            const bUsage = Number(b.usage_details) || 0;
+            totalUsage += bUsage;
+            count++;
+            const [yyyy, mm] = (b.month || "").split("-");
+            const shortYear = yyyy ? yyyy.substring(2) : "00";
+            historyHtml += `<div>20/${mm}/${shortYear}</div><div class="text-right text-[#005bb5] font-bold">${bUsage.toLocaleString()}</div>`;
+            points.push(bUsage);
+          } else {
+            historyHtml += `<div class="text-gray-400">--/--/--</div><div class="text-right text-gray-400">0</div>`;
+            points.push(0);
+          }
+        }
+        historyGrid.innerHTML = historyHtml;
+        const avgUsage =
+          count > 0 ? (totalUsage / count).toFixed(2) : qty.toFixed(2);
+        document.getElementById("slip-avg-usage").textContent =
+          `${avgUsage}kWh`;
+
+        points.reverse();
+        const maxPoint = Math.max(...points) || 1;
+        let polylinePoints = points
+          .map((p, i) => {
+            const x = (i / 11) * 100;
+            const y = 35 - (p / maxPoint) * 25;
+            return `${x},${y}`;
+          })
+          .join(" ");
+
+        const svgChart = document.getElementById("history-chart-svg");
+        if (svgChart) {
+          let svgHtml = `<polyline points="${polylinePoints}" fill="none" stroke="#004890" stroke-width="1.5"/>`;
+          points.forEach((p, i) => {
+            const x = (i / 11) * 100;
+            const y = 35 - (p / maxPoint) * 25;
+            svgHtml += `<circle cx="${x}" cy="${y}" r="2" fill="#004890"/>`;
+          });
+          svgChart.innerHTML = svgHtml;
+        }
+
+        const qrData = encodeURIComponent(
+          `UPAY|${companyName}|${billId}|${amount}`,
+        );
+        document.getElementById("edc-qr").src =
+          `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`;
+        const bcUrl = `https://barcode.tec-it.com/barcode.ashx?data=${billId}&code=Code128&translate-esc=on`;
+        document.getElementById("edc-bc-top").src = bcUrl;
+        document.getElementById("edc-bc-bot").src = bcUrl;
+
+        document.getElementById("slip-modal").classList.remove("hidden");
+      }
+
+      function openEditModal(type, id, extraName = "") {
+        document.getElementById("edit_type").value = type;
+        document.getElementById("edit_id").value = id;
+
+        const titleEl = document.getElementById("edit-modal-title");
+        const groupBill = document.getElementById("edit-group-bill");
+        const f1 = document.getElementById("edit_field_1");
+        const f2 = document.getElementById("edit_field_2");
+        const f3 = document.getElementById("edit_field_3");
+        const f4 = document.getElementById("edit_field_4");
+
+        if (type === "bill") {
+          const b = allBillsData.find((x) => x.bill_id === id);
+          if (!b) return;
+          titleEl.innerHTML = `<i data-lucide="edit" class="w-5 h-5"></i> កែប្រែវិក្កយបត្រ`;
+          groupBill.classList.remove("hidden");
+          f1.value = b.customer_name;
+          f2.value = b.month;
+          f3.value = b.usage_details;
+          f4.value = Number(b.total_amount_usd).toFixed(2);
+          f2.required = true;
+          f3.required = true;
+        } else {
+          titleEl.innerHTML = `<i data-lucide="edit" class="w-5 h-5"></i> កែប្រែឈ្មោះអតិថិជន (${id})`;
+          groupBill.classList.add("hidden");
+          f1.value = extraName;
+          f2.required = false;
+          f3.required = false;
+        }
+        document.getElementById("edit-form-modal").classList.remove("hidden");
+        lucide.createIcons();
+      }
+
+      function calcEditBillAmount() {
+        const rate = Number(session.rate) || 0;
+        const qty = Number(document.getElementById("edit_field_3").value) || 0;
+        document.getElementById("edit_field_4").value = (qty * rate).toFixed(2);
+      }
+
+      document
+        .getElementById("unifiedEditForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("btnUnifiedSave");
+          const ogText = btn.innerHTML;
+          btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> រក្សាទុក...`;
+          btn.disabled = true;
+
+          const type = document.getElementById("edit_type").value;
+          const targetId = document.getElementById("edit_id").value;
+          const newName = document.getElementById("edit_field_1").value.trim();
+
+          if (type === "customer") {
+            const isDuplicateName = allBillsData.some(
+              (b) =>
+                b.consumer_no !== targetId &&
+                safeStr(b.customer_name) === safeStr(newName),
+            );
+            if (isDuplicateName) {
+              Swal.fire(
+                "ឈ្មោះជាន់គ្នា",
+                "មិនអាចមានគណនីអតិថិជនឈ្មោះដូចគ្នាបេះបិទក្នុងប្រព័ន្ធបានទេ!",
+                "error",
+              );
+              btn.innerHTML = ogText;
+              btn.disabled = false;
+              return;
+            }
+          }
+
+          let url = "";
+          let payload = {};
+          if (type === "bill") {
+            url = `${API_URL}/${targetId}`;
+            payload = {
+              customer_name: newName,
+              month: document.getElementById("edit_field_2").value,
+              usage_details: document.getElementById("edit_field_3").value,
+              total_amount_usd: Number(
+                document.getElementById("edit_field_4").value,
+              ),
+            };
+          } else {
+            url = `/api/customers/${targetId}`;
+            payload = { customer_name: newName };
+          }
+
+          try {
+            const res = await fetch(url, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            if (res.ok) {
+              showToast("កែប្រែជោគជ័យ!", "success");
+              closeModal("edit-form-modal");
+              fetchData();
+            } else {
+              showToast("បរាជ័យក្នុងការកែប្រែ", "error");
+            }
+          } catch (e) {
+            showToast("Error Server", "error");
+          } finally {
+            btn.innerHTML = ogText;
+            btn.disabled = false;
+            lucide.createIcons();
+          }
+        });
+
+      function deleteAction(type, id) {
+        const isBill = type === "bill";
+        Swal.fire({
+          title: isBill ? "លុបវិក្កយបត្រ?" : "លុបអតិថិជន?",
+          text: isBill
+            ? `តើអ្នកពិតជាចង់លុបមែនទេ?`
+            : `ទិន្នន័យវិក្កយបត្រទាំងអស់របស់ ${id} នឹងត្រូវលុប។`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#ef4444",
+          confirmButtonText: "យល់ព្រម",
+          cancelButtonText: "បោះបង់",
+        }).then(async (res) => {
+          if (res.isConfirmed) {
+            try {
+              const url = isBill ? `${API_URL}/${id}` : `/api/customers/${id}`;
+              const r = await fetch(url, { method: "DELETE" });
+              if (r.ok) {
+                showToast("លុបជោគជ័យ", "success");
+                fetchData();
+              }
+            } catch (e) {
+              showToast("មានបញ្ហាក្នុងការលុប", "error");
+            }
+          }
+        });
+      }
+
+      function calculateAdvancedAmount() {
+        const rate = Number(session.rate) || 0;
+        document.getElementById("rate").value = rate;
+        document.getElementById("rate-hint").textContent =
+          `$${rate.toFixed(2)}`;
+
+        const oldRead =
+          Number(document.getElementById("old_reading").value) || 0;
+        const newRead =
+          Number(document.getElementById("new_reading").value) || 0;
+        let qty = 0;
+        if (newRead > 0 && newRead >= oldRead) {
+          qty = newRead - oldRead;
+          document.getElementById("usage_details").value = qty;
+        } else {
+          qty = Number(document.getElementById("usage_details").value) || 0;
+        }
+        document.getElementById("total_amount_usd").value = (
+          qty * rate
+        ).toFixed(2);
+      }
+
+      function calculateAutoAmount() {
+        const rate = Number(session.rate) || 0;
+        const qty = Number(document.getElementById("usage_details").value) || 0;
+        document.getElementById("rate-hint").textContent =
+          `$${rate.toFixed(2)}`;
+        document.getElementById("total_amount_usd").value = (
+          qty * rate
+        ).toFixed(2);
+      }
+
+      function handleConsumerNoInput() {
+        const consumerNo = document.getElementById("consumer_no").value.trim();
+        const customerBills = allBillsData.filter(
+          (b) => b.consumer_no === consumerNo,
+        );
+        if (customerBills.length > 0) {
+          customerBills.sort((a, b) =>
+            (b.month || "").localeCompare(a.month || ""),
+          );
+          const latestBill = customerBills[0];
+          document.getElementById("customer_name").value =
+            latestBill.customer_name;
+          const lastReading =
+            latestBill.new_reading || latestBill.usage_details || 0;
+          if (document.getElementById("old_reading"))
+            document.getElementById("old_reading").value = lastReading;
+        } else {
+          if (document.getElementById("old_reading"))
+            document.getElementById("old_reading").value = 0;
+        }
+        if (typeof calculateAdvancedAmount === "function")
+          calculateAdvancedAmount();
+      }
+
+      function updateCustomerDatalist() {
+        const unique = {};
+        allBillsData.forEach((b) => {
+          if (b.consumer_no) unique[b.consumer_no] = b;
+        });
+        document.getElementById("existing-customers").innerHTML = Object.values(
+          unique,
+        )
+          .map(
+            (c) =>
+              `<option value="${c.consumer_no}">${c.customer_name}</option>`,
+          )
+          .join("");
+      }
+
+      document
+        .getElementById("billForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("submitBtn");
+          btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> រក្សាទុក...`;
+          btn.disabled = true;
+          let cNo = document.getElementById("consumer_no").value.trim();
+          const reqMonth = document.getElementById("month").value;
+          const reqName = document.getElementById("customer_name").value.trim();
+          let isNew = false;
+
+          if (!cNo) {
+            cNo = "CUS" + Math.floor(10000000 + Math.random() * 90000000);
+            isNew = true;
+          }
+
+          if (isNew) {
+            const existName = allBillsData.some(
+              (b) => safeStr(b.customer_name) === safeStr(reqName),
+            );
+            if (existName) {
+              Swal.fire(
+                "ឈ្មោះជាន់គ្នា",
+                "មិនអនុញ្ញាតឱ្យបង្កើតគណនីថ្មីដែលមានឈ្មោះដូចគ្នាដែលមានស្រាប់ទេ!",
+                "error",
+              );
+              btn.innerHTML = `ចេញវិក្កយបត្រ (Issue Bill)`;
+              btn.disabled = false;
+              lucide.createIcons();
+              return;
+            }
+          }
+
+          const monthDuplicate = allBillsData.some(
+            (b) => b.consumer_no === cNo && b.month === reqMonth,
+          );
+          if (monthDuplicate) {
+            Swal.fire(
+              "វិក្កយបត្រជាន់ខែ",
+              `អតិថិជន ${cNo} មានវិក្កយបត្រសម្រាប់ខែ ${reqMonth} រួចរាល់ហើយ! មួយខែមានវិក្កយបត្រតែមួយគត់។`,
+              "error",
+            );
+            btn.innerHTML = `ចេញវិក្កយបត្រ (Issue Bill)`;
+            btn.disabled = false;
+            lucide.createIcons();
+            return;
+          }
+
+          const generatedBillId =
+            "INV-" + Math.floor(10000000 + Math.random() * 90000000);
+          const newBill = {
+            bill_id: generatedBillId,
+            company: session.company,
+            customer_name: reqName,
+            consumer_no: cNo,
+            month: reqMonth,
+            issue_date: document.getElementById("issue_date").value,
+            due_date: document.getElementById("due_date").value,
+            old_reading:
+              Number(document.getElementById("old_reading").value) || 0,
+            new_reading:
+              Number(document.getElementById("new_reading").value) || 0,
+            usage_details:
+              Number(document.getElementById("usage_details").value) || 0,
+            rate: Number(session.rate) || 0,
+            total_amount_usd: Number(
+              document.getElementById("total_amount_usd").value || 0,
+            ),
+          };
+
+          try {
+            const res = await fetch(API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(newBill),
+            });
+            if (res.ok) {
+              if (isNew) {
+                Swal.fire({
+                  icon: "success",
+                  title: "ជោគជ័យ!",
+                  html: `លេខកូដថ្មី៖ <b>${cNo}</b>`,
+                  confirmButtonColor: "#4f46e5",
+                });
+              } else {
+                showToast("ជោគជ័យ!", "success");
+              }
+              fetchData();
+              document.getElementById("billForm").reset();
+              document.getElementById("company").value = session.company;
+              const today = new Date();
+              document.getElementById("issue_date").value = today
+                .toISOString()
+                .split("T")[0];
+              updateDueDateOneWeek();
+              calculateAdvancedAmount();
+            }
+          } catch (e) {
+            showToast("បរាជ័យ", "error");
+          } finally {
+            btn.innerHTML = `ចេញវិក្កយបត្រ (Issue Bill)`;
+            btn.disabled = false;
+            lucide.createIcons();
+          }
+        });
+
+      // 8. Bulk Entry
+      function updateAllBulkMonths() {
+        const m = document.getElementById("bulk-global-month").value;
+        document
+          .querySelectorAll('input[id^="bulk-month-"]')
+          .forEach((i) => (i.value = m));
+      }
+      function calcMeterRow(id) {
+        const rate = Number(session.rate) || 0;
+        const oldM =
+          Number(document.getElementById(`bulk-old-${id}`).value) || 0;
+        const newM =
+          Number(document.getElementById(`bulk-new-${id}`).value) || 0;
+        let qty = newM - oldM;
+        if (qty < 0) qty = 0;
+        document.getElementById(`bulk-qty-${id}`).value = qty;
+        document.getElementById(`bulk-total-${id}`).value = (
+          qty * rate
+        ).toFixed(2);
+      }
+      async function submitBulkRow(cNo, cName) {
+        const m = document.getElementById(`bulk-month-${cNo}`).value;
+        const t = Number(document.getElementById(`bulk-total-${cNo}`).value);
+        const u = document.getElementById(`bulk-qty-${cNo}`).value;
+        const oldRead = document.getElementById(`bulk-old-${cNo}`)
+          ? Number(document.getElementById(`bulk-old-${cNo}`).value)
+          : 0;
+        const newRead = document.getElementById(`bulk-new-${cNo}`)
+          ? Number(document.getElementById(`bulk-new-${cNo}`).value)
+          : 0;
+
+        const isMonthDuplicate = allBillsData.some(
+          (b) => b.consumer_no === cNo && b.month === m,
+        );
+        if (isMonthDuplicate) {
+          Swal.fire(
+            "វិក្កយបត្រជាន់ខែ",
+            `អតិថិជន ${cNo} មានវិក្កយបត្រសម្រាប់ខែ ${m} រួចហើយ! មិនអាចចេញជាន់គ្នាបានទេ។`,
+            "error",
+          );
+          return;
+        }
+
+        if (t <= 0) return showToast("បរិមាណមិនត្រឹមត្រូវ!", "error");
+
+        const generatedBillId =
+          "INV-" + Math.floor(10000000 + Math.random() * 90000000);
+        const iDate = new Date();
+        const dDate = new Date(iDate);
+        dDate.setDate(iDate.getDate() + 7);
+
+        try {
+          await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              bill_id: generatedBillId,
+              company: session.company,
+              customer_name: cName,
+              consumer_no: cNo,
+              month: m,
+              issue_date: iDate.toISOString().split("T")[0],
+              due_date: dDate.toISOString().split("T")[0],
+              usage_details: u,
+              old_reading: oldRead,
+              new_reading: newRead,
+              rate: Number(session.rate),
+              total_amount_usd: t,
+            }),
+          });
+          showToast(`ជោគជ័យ!`, "success");
+          fetchData();
+        } catch (e) {
+          showToast("បរាជ័យ!", "error");
+        }
+      }
+
+      async function autoGenerateFixedBills() {
+        const unique = {};
+        allBillsData.forEach((b) => {
+          if (b.consumer_no && !unique[b.consumer_no])
+            unique[b.consumer_no] = b;
+        });
+        const custs = Object.values(unique);
+        if (custs.length === 0) return showToast("គ្មានអតិថិជន!", "error");
+        const m =
+          document.getElementById("bulk-global-month").value ||
+          new Date().toISOString().slice(0, 7);
+        const r = Number(session.rate) || 0;
+
+        Swal.fire({
+          title: "បញ្ជាក់",
+          text: `បង្កើតវិក្កយបត្របង់ថេរ ${custs.length} សម្រាប់ខែ ${m}?`,
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonColor: "#4f46e5",
+          confirmButtonText: "យល់ព្រម",
+        }).then(async (res) => {
+          if (res.isConfirmed) {
+            Swal.fire({
+              title: "កំពុងដំណើរការ...",
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              },
+            });
+            let s = 0;
+            const iDateStr = new Date().toISOString().split("T")[0];
+            const dDate = new Date();
+            dDate.setDate(dDate.getDate() + 7);
+            const dDateStr = dDate.toISOString().split("T")[0];
+
+            for (const c of custs) {
+              const monthDuplicate = allBillsData.some(
+                (b) => b.consumer_no === c.consumer_no && b.month === m,
+              );
+              if (monthDuplicate) continue;
+              try {
+                const generatedBillId =
+                  "INV-" + Math.floor(10000000 + Math.random() * 90000000);
+                await fetch(API_URL, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    bill_id: generatedBillId,
+                    company: session.company,
+                    customer_name: c.customer_name,
+                    consumer_no: c.consumer_no,
+                    month: m,
+                    issue_date: iDateStr,
+                    due_date: dDateStr,
+                    usage_details: 1,
+                    rate: r,
+                    total_amount_usd: r,
+                  }),
+                });
+                s++;
+              } catch (e) {}
+            }
+            Swal.fire(
+              "ជោគជ័យ!",
+              `បានបង្កើតវិក្កយបត្រចំនួន ${s} មិនរាប់បញ្ចូលអ្នកជាន់ខែឡើយ`,
+              "success",
+            );
+            fetchData();
+          }
+        });
+      }
+
+      function renderBulkTable() {
+        const unique = {};
+        allBillsData.forEach((b) => {
+          if (b.consumer_no && !unique[b.consumer_no])
+            unique[b.consumer_no] = b;
+        });
+        const m =
+          document.getElementById("bulk-global-month").value ||
+          new Date().toISOString().slice(0, 7);
+        const isMeter = session.type === "meter";
+        const rate = Number(session.rate) || 0;
+        document.getElementById("bulk-subtitle").textContent = isMeter
+          ? "បញ្ចូលលេខកុងទ័រចាស់ និងថ្មី"
+          : "ប្រព័ន្ធចេញវិក្កយបត្របង់ថេរស្វ័យប្រវត្តិ";
+        if (!isMeter)
+          document
+            .getElementById("btn-auto-generate")
+            .classList.remove("hidden");
+        else
+          document.getElementById("btn-auto-generate").classList.add("hidden");
+        document.getElementById("bulk-table-head").innerHTML =
+          `<tr><th class="px-6 py-3 font-semibold">អតិថិជន / លេខកូដ</th><th class="px-6 py-3 w-40 font-semibold">សម្រាប់ខែ</th>${isMeter ? '<th class="px-6 py-3 w-32 font-semibold">កុងទ័រចាស់</th><th class="px-6 py-3 w-32 font-semibold">កុងទ័រថ្មី</th><th class="px-6 py-3 w-24 font-semibold">ប្រើប្រាស់</th>' : '<th class="px-6 py-3 w-32 font-semibold">តម្លៃថេរ</th>'}<th class="px-6 py-3 w-32 font-semibold">សរុប (USD)</th><th class="px-6 py-3 text-right font-semibold">សកម្មភាព</th></tr>`;
+
+        document.getElementById("bulk-table-body").innerHTML =
+          Object.values(unique)
+            .map((c) => {
+              const cBills = allBillsData
+                .filter((x) => x.consumer_no === c.consumer_no)
+                .sort((a, b) => (b.month || "").localeCompare(a.month || ""));
+              const lastRead =
+                cBills.length > 0
+                  ? cBills[0].new_reading || cBills[0].usage_details || 0
+                  : 0;
+              return `<tr class="hover:bg-slate-50 border-b border-slate-50" id="bulk-row-${c.consumer_no}"><td class="px-6 py-3"><div class="font-bold text-slate-800">${c.customer_name || "N/A"}</div><div class="text-xs text-slate-500 font-mono">${c.consumer_no}</div></td><td class="px-6 py-3"><input type="month" value="${m}" id="bulk-month-${c.consumer_no}" class="border border-slate-200 rounded-lg p-1.5 text-sm w-full outline-none focus:ring-2 focus:ring-indigo-500"></td>${isMeter ? `<td class="px-6 py-3"><input type="number" id="bulk-old-${c.consumer_no}" value="${lastRead}" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full outline-none font-mono focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-new-${c.consumer_no}" placeholder="0" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full font-mono outline-none focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none font-semibold text-slate-600" value="0"></td>` : `<td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none text-center font-semibold text-slate-600" value="1"></td>`}<td class="px-6 py-3"><input type="text" id="bulk-total-${c.consumer_no}" readonly class="bg-indigo-50/50 text-indigo-700 font-bold border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none" value="${!isMeter ? rate.toFixed(2) : "0.00"}"></td><td class="px-6 py-3 text-right"><button onclick="submitBulkRow('${c.consumer_no}', '${escapeHtml(c.customer_name)}')" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-xs font-bold ml-auto flex items-center gap-1.5 hover:bg-emerald-100 transition-colors shadow-sm"><i data-lucide="send" class="w-3.5 h-3.5"></i> ${isMeter ? "ចេញវិក្កយបត្រ" : "Issue Bill"}</button></td></tr>`;
+            })
+            .join("") ||
+          '<tr><td colspan="7" class="text-center py-12 text-slate-400">គ្មានទិន្នន័យ</td></tr>';
+      }
+
+      // 9. Customers Panel
+      function renderCustomers() {
+        const statusFilter = document.getElementById("filter-status").value;
+        const cMap = {};
+        allBillsData.forEach((b) => {
+          if (!b.consumer_no) return;
+          if (!cMap[b.consumer_no])
+            cMap[b.consumer_no] = {
+              name: b.customer_name || "Unknown",
+              count: 0,
+              debt: 0,
+              hasUnpaid: false,
+            };
+          cMap[b.consumer_no].count++;
+          if (b.status === "Unpaid") {
+            cMap[b.consumer_no].debt += Number(b.total_amount_usd || 0);
+            cMap[b.consumer_no].hasUnpaid = true;
+          }
+        });
+
+        let arr = Object.entries(cMap).map(([id, d]) => ({ id, ...d }));
+        if (statusFilter === "Debt") arr = arr.filter((c) => c.hasUnpaid);
+        else if (statusFilter === "NoDebt")
+          arr = arr.filter((c) => !c.hasUnpaid);
+
+        document.getElementById("customers-table").innerHTML =
+          arr
+            .map(
+              (c) => `
+          <tr class="hover:bg-slate-50 border-b border-slate-50">
+            <td class="px-6 py-4 font-medium text-slate-900 font-mono">${c.id}</td>
+            <td class="px-6 py-4 font-bold text-slate-800 break-all max-w-[180px]">${c.name}</td>
+            <td class="px-6 py-4"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-xs font-semibold">${c.count} វិក្កយបត្រ</span></td>
+            <td class="px-6 py-4 font-bold font-mono ${c.debt > 0 ? "text-rose-600" : "text-emerald-600"}">${c.debt > 0 ? "$" + c.debt.toFixed(2) : "គ្មានបំណុល"}</td>
+            <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <button onclick="showCustomerSlip('${c.id}')" class="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition" title="វិក្កយបត្រចុងក្រោយ (Slip)"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                  <button onclick="openEditModal('customer', '${c.id}', '${escapeHtml(c.name)}')" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition" title="កែប្រែឈ្មោះ (Edit Profile)"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                  <button onclick="deleteAction('customer', '${c.id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition" title="លុបអតិថិជន (Delete)"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            </td>
+          </tr>
+        `,
+            )
+            .join("") ||
+          '<tr><td colspan="5" class="text-center py-12 text-slate-400">គ្មានទិន្នន័យអតិថិជនទេ</td></tr>';
+      }
+
+      function showCustomerSlip(consumerNo) {
+        const customerBills = allBillsData.filter(
+          (b) => b.consumer_no === consumerNo,
+        );
+        if (customerBills.length > 0) {
+          customerBills.sort((a, b) =>
+            (b.month || "").localeCompare(a.month || ""),
+          );
+          showSlip(customerBills[0].bill_id);
+        } else {
+          showToast("អតិថិជននេះមិនទាន់មានវិក្កយបត្រទេ!", "error");
+        }
+      }
+
+      function showToast(msg, type) {
+        const c = document.getElementById("toast-container");
+        const t = document.createElement("div");
+        const isOk = type === "success";
+        t.className = `flex items-center p-4 bg-white border-l-4 ${isOk ? "border-emerald-500" : "border-rose-500"} rounded shadow-lg toast-enter`;
+        t.innerHTML = `<div class="ml-2 mr-4 text-sm font-bold ${isOk ? "text-emerald-700" : "text-rose-700"}">${msg}</div>`;
+        c.appendChild(t);
+        setTimeout(() => {
+          t.classList.replace("toast-enter", "toast-leave");
+          setTimeout(() => t.remove(), 300);
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>
