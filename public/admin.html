@@ -604,11 +604,9 @@
         });
 
         try {
-          // ត្រង់នេះ! ប្រសិនបើ U-PAY របស់បង Host លើ Render សូមដូរលីងទីនេះ
-          // ឧទាហរណ៍៖ const res = await fetch(`https://ឈ្មោះ-upay-របស់បង.onrender.com/api/bank/verify-account/${accNo}`);
-
+          // ហៅទៅកាន់ Cloud U-PAY នៅលើ Render ផ្ទាល់តែម្តង
           const res = await fetch(
-            `http://localhost:3000/api/bank/verify-account/${accNo}`,
+            `https://u-pay-bank.onrender.com/api/bank/verify-account/${accNo}`,
           );
           const data = await res.json();
           Swal.close();
@@ -618,7 +616,7 @@
 
           if (res.ok && data.success) {
             vResult.className = "text-sm font-semibold text-emerald-600 mt-2";
-            vResult.innerHTML = `<i class="fa-solid fa-circle-check"></i> គណនីត្រឹមត្រូវ: <b>${data.account_name}</b>`;
+            vResult.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 inline"></i> គណនីត្រឹមត្រូវ: <b>${data.account_name}</b>`;
 
             isAccountVerified = true;
             const btn = document.getElementById("btn-submit-comp");
@@ -628,14 +626,14 @@
             lucide.createIcons();
           } else {
             vResult.className = "text-sm font-semibold text-rose-600 mt-2";
-            vResult.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${data.message || "រកមិនឃើញគណនី!"}`;
+            vResult.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 inline"></i> ${data.message || "រកមិនឃើញគណនី!"}`;
             resetVerification();
           }
         } catch (e) {
           Swal.close();
           Swal.fire(
             "Error",
-            "មិនអាចភ្ជាប់ទៅកាន់ U-PAY Server ទេ! សូមប្រាកដថាប្រព័ន្ធ U-PAY កំពុងដំណើរការ។",
+            "មិនអាចភ្ជាប់ទៅកាន់ U-PAY Server ទេ! សូមប្រាកដថាប្រព័ន្ធ U-PAY (Render) មិនកំពុងដេក (Sleep)។",
             "error",
           );
         }
