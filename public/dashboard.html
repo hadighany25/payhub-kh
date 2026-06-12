@@ -1288,7 +1288,7 @@
       let statusChartInstance = null;
       const API_URL = window.location.protocol.includes("http")
         ? "/api/bills"
-        : "https://payhub-kh.onrender.com/api/bills";
+        : "http://localhost:4000/api/bills";
 
       const safeStr = (val) => (val || "").toString().toLowerCase();
       function escapeHtml(str) {

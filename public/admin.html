@@ -482,8 +482,8 @@
       let allCompaniesData = [];
       let isAccountVerified = false; // Flag សំរាប់ Check ថាបាន Verify U-PAY នៅ
 
-      const API_URL = "https://payhub-kh.onrender.com";
-      const UPAY_API = "https://u-pay-bank.onrender.com/api/bank";
+      const API_URL = "http://localhost:4000/api";
+      const UPAY_API = "http://localhost:3000/api/bank";
 
       function switchView(view) {
         ["overview", "companies"].forEach((v) => {
@@ -542,34 +542,34 @@
             allCompaniesData
               .map(
                 (c) => `
-                  <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
-                    <td class="px-6 py-4">
-                      <div class="font-bold text-slate-800">${c.name}</div>
-                      <div class="text-xs text-indigo-600 font-semibold">${c.id}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-slate-600 font-medium">${c.phone || "-"}</div>
-                        <div class="text-xs text-slate-400">${c.category || "N/A"}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="font-mono text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${c.upay_account || "N/A"}</span>
-                        <div class="text-[10px] text-amber-600 mt-1">Fee: ${c.fee_percent || 0}%</div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in cursor-pointer" onclick="toggleStatus('${c.id}', '${c.status}')">
-                            <input type="checkbox" ${c.status === "active" ? "checked" : ""} class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200" style="border-color: ${c.status === "active" ? "#10b981" : "#cbd5e1"}; right: ${c.status === "active" ? "0" : "20px"};"/>
-                            <label class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer" style="background-color: ${c.status === "active" ? "#10b981" : "#e2e8f0"}"></label>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-right font-bold text-emerald-600">$${parseFloat(c.balance || 0).toFixed(2)}</td>
-                    <td class="px-6 py-4 text-right">
-                      <div class="flex items-center justify-end gap-2">
-                          <button onclick="openCompanyModal('${c.id}')" class="p-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                          <button onclick="deleteCompany('${c.id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                      </div>
-                    </td>
-                  </tr>
-                `,
+            <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
+              <td class="px-6 py-4">
+                <div class="font-bold text-slate-800">${c.name}</div>
+                <div class="text-xs text-indigo-600 font-semibold">${c.id}</div>
+              </td>
+              <td class="px-6 py-4">
+                  <div class="text-slate-600 font-medium">${c.phone || "-"}</div>
+                  <div class="text-xs text-slate-400">${c.category || "N/A"}</div>
+              </td>
+              <td class="px-6 py-4">
+                  <span class="font-mono text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${c.upay_account || "N/A"}</span>
+                  <div class="text-[10px] text-amber-600 mt-1">Fee: ${c.fee_percent || 0}%</div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                  <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in cursor-pointer" onclick="toggleStatus('${c.id}', '${c.status}')">
+                      <input type="checkbox" ${c.status === "active" ? "checked" : ""} class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200" style="border-color: ${c.status === "active" ? "#10b981" : "#cbd5e1"}; right: ${c.status === "active" ? "0" : "20px"};"/>
+                      <label class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer" style="background-color: ${c.status === "active" ? "#10b981" : "#e2e8f0"}"></label>
+                  </div>
+              </td>
+              <td class="px-6 py-4 text-right font-bold text-emerald-600">$${parseFloat(c.balance || 0).toFixed(2)}</td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="openCompanyModal('${c.id}')" class="p-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                    <button onclick="deleteCompany('${c.id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+              </td>
+            </tr>
+          `,
               )
               .join("") ||
             '<tr><td colspan="6" class="text-center py-12 text-slate-400">មិនមានទិន្នន័យទេ</td></tr>';
@@ -604,44 +604,39 @@
         });
 
         try {
-          // ១. ហៅទៅកាន់ Cloud U-PAY របស់ប្អូន
-          const res = await fetch(
-            `https://u-pay-bank.onrender.com/api/bank/verify-account/${accNum}`,
-          );
+          const res = await fetch(`${UPAY_API}/verify-account/${accNo}`);
           const data = await res.json();
+          Swal.close();
 
-          // ២. ឆែកលក្ខខណ្ឌ (កូដ U-PAY បោះមកក្នុងទម្រង់ { success: true, account_name: "..." })
-          if (data.success) {
-            document.getElementById("accNameDisplay").innerText =
-              data.account_name;
-            document
-              .getElementById("accNameDisplay")
-              .classList.remove("text-rose-500");
-            document
-              .getElementById("accNameDisplay")
-              .classList.add("text-emerald-500");
-            showToast("រកឃើញគណនីពិតប្រាកដ!", "success");
+          const vResult = document.getElementById("verify-result");
+          vResult.classList.remove("hidden");
+
+          if (res.ok && data.success) {
+            vResult.className = "text-sm font-semibold text-emerald-600 mt-2";
+            vResult.innerHTML = `<i class="fa-solid fa-circle-check"></i> គណនីត្រឹមត្រូវ: <b>${data.account_name}</b>`;
+
+            // អនុញ្ញាតអោយ Save
+            isAccountVerified = true;
+            const btn = document.getElementById("btn-submit-comp");
+            btn.disabled = false;
+            btn.classList.remove("opacity-50", "cursor-not-allowed");
+            btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> រក្សាទុកទិន្នន័យ`;
+            lucide.createIcons();
           } else {
-            document.getElementById("accNameDisplay").innerText =
-              "រកមិនឃើញគណនីនេះទេ!";
-            document
-              .getElementById("accNameDisplay")
-              .classList.remove("text-emerald-500");
-            document
-              .getElementById("accNameDisplay")
-              .classList.add("text-rose-500");
-            showToast(data.message || "រកមិនឃើញគណនី!", "error");
+            vResult.className = "text-sm font-semibold text-rose-600 mt-2";
+            vResult.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${data.message}`;
+            resetVerification();
           }
         } catch (e) {
-          console.error(e);
-          document.getElementById("accNameDisplay").innerText =
-            "កំហុសក្នុងការតភ្ជាប់!";
-          showToast("មិនអាចភ្ជាប់ទៅកាន់ U-PAY Cloud Server បានទេ!", "error");
-        } finally {
-          document.getElementById("verify-result").classList.remove("hidden");
-          lucide.createIcons();
+          Swal.close();
+          Swal.fire(
+            "Error",
+            "មិនអាចភ្ជាប់ទៅកាន់ U-PAY Server ទេ! សូមប្រាកដថា Port 3000 កំពុងដើរ",
+            "error",
+          );
         }
       }
+
       // --- Add/Edit Modal ---
       function openCompanyModal(companyId = null) {
         document.getElementById("company-modal").classList.remove("hidden");
