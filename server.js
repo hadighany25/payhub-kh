@@ -20,8 +20,7 @@ app.use(express.json());
 // ១. តភ្ជាប់ទៅកាន់ MongoDB Atlas
 // -------------------------------------------------------------
 const MONGO_URI =
-  "mongodb+srv://hadighany25_db_user:cylhIkO9MRPkvZlq@cluster0.l4alwz4.mongodb.net/payhub_db?appName=Cluster0";
-
+  "mongodb+srv://hadighany25_db_user:qI7Xc8IYSIdwupTU@cluster0.izzf48u.mongodb.net/payhub_db?appName=Cluster0";
 mongoose
   .connect(MONGO_URI)
   .then(() => {
