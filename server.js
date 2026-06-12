@@ -13,10 +13,11 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // -------------------------------------------------------------
-// ១. តភ្ជាប់ទៅកាន់ MongoDB Atlas (ប្រើ Password ថ្មី)
+// ១. តភ្ជាប់ទៅកាន់ MongoDB Atlas
 // -------------------------------------------------------------
 const MONGO_URI =
   "mongodb+srv://hadighany25_db_user:YNGQgEp2Pz6V8LWX@cluster0.izzf48u.mongodb.net/payhub_db?appName=Cluster0";
+
 mongoose
   .connect(MONGO_URI)
   .then(() => {
@@ -79,30 +80,33 @@ const TransactionSchema = new mongoose.Schema({
 });
 const Transaction = mongoose.model("Transaction", TransactionSchema);
 
-// បង្កើត Super Admin ອູតូ
+// បង្កើត Super Admin ស្វ័យប្រវត្តិ
 const checkSuperAdmin = async () => {
-  const admin = await User.findOne({ role: "superadmin" });
-  if (!admin) {
-    await User.create({
-      email: "admin@gmail.com",
-      password: "123",
-      role: "superadmin",
-      name: "PayHub HQ",
-    });
-    console.log("✅ បានបង្កើតគណនី Super Admin រួចរាល់!");
+  try {
+    const admin = await User.findOne({ role: "superadmin" });
+    if (!admin) {
+      await User.create({
+        email: "admin@gmail.com",
+        password: "123",
+        role: "superadmin",
+        name: "PayHub HQ",
+      });
+      console.log("✅ បានបង្កើតគណនី Super Admin រួចរាល់!");
+    }
+  } catch (err) {
+    console.error("❌ កំហុសក្នុងការបង្កើត Super Admin:", err);
   }
 };
 
 // -------------------------------------------------------------
-// ៣. ROUTES & APIs
+// ៣. ROUTES & APIs ទូទៅ
 // -------------------------------------------------------------
 
-// ពេលវាយលីង Render បើកផ្ទាំង Login ភ្លាម
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// --- LOGIN ---
+// --- LOGIN API ---
 app.post("/api/login", async (req, res) => {
   try {
     const { role, email, password, company } = req.body;
@@ -135,11 +139,12 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ message: "ព័ត៌មានគណនីមិនត្រឹមត្រូវ!" });
     }
   } catch (err) {
+    console.error(" Login Error:", err);
     res.status(500).json({ message: "Server Error" });
   }
 });
 
-// --- COMPANIES ---
+// --- API គ្រប់គ្រងក្រុមហ៊ុន (ADMIN) ---
 app.get("/api/companies", async (req, res) => {
   try {
     const companies = await User.find({ role: "company" }).select("name");
@@ -159,7 +164,19 @@ app.get("/api/admin/users", async (req, res) => {
 
 app.post("/api/register", async (req, res) => {
   try {
-    const { name, email, ...otherData } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      category,
+      upay_account,
+      type,
+      expiry_date,
+      rate,
+      fee_percent,
+      password,
+    } = req.body;
+
     const existingUser = await User.findOne({ $or: [{ email }, { name }] });
     if (existingUser) {
       if (existingUser.email === email)
@@ -167,26 +184,44 @@ app.post("/api/register", async (req, res) => {
       if (existingUser.name === name)
         return res.status(400).json({ message: "ក្រុមហ៊ុននេះមានរួចហើយ!" });
     }
+
+    // ជួសជុលបញ្ហាការ Save ដោយប្រាកដថា rate និង fee_percent ជាលេខ (Number)
     const newUser = await User.create({
       id: `CO-${Date.now()}`,
       name,
       email,
-      ...otherData,
+      phone,
+      category,
+      upay_account,
+      type,
+      expiry_date,
+      password,
+      rate: Number(rate) || 0,
+      fee_percent: Number(fee_percent) || 0,
       role: "company",
       status: "active",
       balance: 0,
     });
+    console.log("✅ បានបង្កើតក្រុមហ៊ុនថ្មី:", name);
     res.status(201).json({ message: "បង្កើតបានជោគជ័យ!", user: newUser });
   } catch (err) {
-    res.status(500).json({ message: "Server Error" });
+    console.error("❌ Register Error:", err);
+    res
+      .status(500)
+      .json({ message: "បរាជ័យក្នុងការ Save ទិន្នន័យ (Server Error)" });
   }
 });
 
 app.put("/api/admin/users/:id", async (req, res) => {
   try {
+    const updateData = { ...req.body };
+    if (updateData.rate) updateData.rate = Number(updateData.rate);
+    if (updateData.fee_percent)
+      updateData.fee_percent = Number(updateData.fee_percent);
+
     const updated = await User.findOneAndUpdate(
       { id: req.params.id },
-      req.body,
+      updateData,
       { new: true },
     );
     if (!updated)
@@ -206,7 +241,7 @@ app.delete("/api/admin/users/:id", async (req, res) => {
   }
 });
 
-// --- BILLS ---
+// --- API គ្រប់គ្រងវិក្កយបត្រ (BILLS) ---
 app.get("/api/bills", async (req, res) => {
   try {
     const company = req.query.company;
@@ -275,14 +310,19 @@ app.put("/api/customers/:consumer_no", async (req, res) => {
   }
 });
 
-// --- GATEWAY ---
+// -------------------------------------------------------------
+// ៤. GATEWAY (សម្រាប់ U-PAY ហៅចូលមក PayHub)
+// -------------------------------------------------------------
+
+// API នេះសម្រាប់ឱ្យ U-PAY App Scan QR Code រួចហៅមកសួររកវិក្កយបត្រ
 app.get("/api/gateway/check-bill", async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query } = req.query; // អាចជាលេខ bill_id ឬ consumer_no
     const bill = await Bill.findOne({
       $or: [{ bill_id: query }, { consumer_no: query }],
       status: "Unpaid",
     });
+
     if (bill) {
       const company = await User.findOne({
         name: bill.company,
@@ -291,36 +331,58 @@ app.get("/api/gateway/check-bill", async (req, res) => {
       if (company && company.status === "inactive")
         return res
           .status(403)
-          .json({ success: false, message: "ផ្អាកសេវាកម្ម!" });
+          .json({
+            success: false,
+            message: "ក្រុមហ៊ុននេះត្រូវបានផ្អាកសេវាកម្មទូទាត់បណ្តោះអាសន្ន!",
+          });
+
+      // បោះទិន្នន័យពេញលេញទៅឱ្យ U-PAY App បង្ហាញលើទូរស័ព្ទអតិថិជន
       res.json({ success: true, bill });
     } else {
-      res.status(404).json({ success: false, message: "រកមិនឃើញ ឬទូទាត់រួច!" });
+      res
+        .status(404)
+        .json({
+          success: false,
+          message: "រកវិក្កយបត្រមិនឃើញ ឬបានទូទាត់រួចរាល់ហើយ!",
+        });
     }
   } catch (err) {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
 
+// API នេះសម្រាប់ឱ្យ U-PAY ហៅមកប្រាប់ PayHub ថាអតិថិជនទូទាត់រួចរាល់ហើយ (Webhook)
 app.post("/api/gateway/pay", async (req, res) => {
   try {
-    const { bill_id } = req.body;
+    // ទទួលបាន bill_id ពី U-PAY App បន្ទាប់ពីកាត់លុយក្នុង App រួច
+    const { bill_id, upay_trx_id } = req.body;
     const bill = await Bill.findOne({ bill_id, status: "Unpaid" });
-    if (!bill)
-      return res.status(400).json({ success: false, message: "ទូទាត់រួចហើយ" });
 
+    if (!bill)
+      return res
+        .status(400)
+        .json({ success: false, message: "វិក្កយបត្រត្រូវបានទូទាត់រួចហើយ" });
+
+    // ១. កែប្រែស្ថានភាពវិក្កយបត្រទៅជា Paid
     bill.status = "Paid";
     bill.paid_at = new Date();
     await bill.save();
 
+    // ២. ការទូទាត់ទាត់កាត់កង (Settlement) ចូលគណនីក្រុមហ៊ុន
     const company = await User.findOne({ name: bill.company, role: "company" });
     if (company) {
+      // គណនាថ្លៃសេវា ដែល PayHub ត្រូវកាត់
       const feeAmt =
         (parseFloat(bill.total_amount_usd) * (company.fee_percent || 0)) / 100;
-      const netAmt = parseFloat(bill.total_amount_usd) - feeAmt;
+      const netAmt = parseFloat(bill.total_amount_usd) - feeAmt; // សល់ពីកាត់សេវា
+
+      // បញ្ចូលលុយទៅក្នុង Balance របស់ក្រុមហ៊ុនក្នុងប្រព័ន្ធ
       company.balance = (company.balance || 0) + netAmt;
       await company.save();
+
+      // ៣. កត់ត្រាចូលក្នុងតារាងប្រវត្តិ Transaction
       await Transaction.create({
-        trx_id: `TRX-${Date.now()}`,
+        trx_id: upay_trx_id || `TRX-${Date.now()}`, // អាចប្រើលេខកូដពី U-PAY បើគេបោះមក
         bill_id: bill.bill_id,
         company: company.name,
         total_amount: bill.total_amount_usd,
@@ -328,8 +390,10 @@ app.post("/api/gateway/pay", async (req, res) => {
         net_amount: netAmt,
       });
     }
+    console.log(`✅ ការទូទាត់ជោគជ័យសម្រាប់វិក្កយបត្រ៖ ${bill_id}`);
     res.json({ success: true, message: "ទូទាត់ជោគជ័យ!" });
   } catch (err) {
+    console.error("❌ Gateway Pay Error:", err);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
