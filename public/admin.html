@@ -480,10 +480,30 @@
     <script>
       lucide.createIcons();
       let allCompaniesData = [];
-      let isAccountVerified = false; // Flag សំរាប់ Check ថាបាន Verify U-PAY នៅ
+      let companiesHash = ""; // សម្រាប់ឆែកទិន្នន័យចាស់ជៀសវាង UI Refresh ញ័រ
+      let isAccountVerified = false;
 
-      const API_URL = "http://localhost:4000/api";
-      const UPAY_API = "http://localhost:3000/api/bank";
+      // ប្រើ /api ជាស្តង់ដារសម្រាប់ Monolithic (មិនគាំងលើ Render ទៀតទេ)
+      const API_URL = "/api";
+      const UPAY_API = "https://u-pay-bank.onrender.com/api/bank";
+
+      // ដំណើរការពេល Page ដើរ (មាន Local Storage ដើម្បីចាំ Tab)
+      document.addEventListener("DOMContentLoaded", () => {
+        // រក្សាទុក Tab មិនឱ្យលោតទៅដើមវិញពេល F5
+        const activeTab =
+          localStorage.getItem("admin_active_tab") || "overview";
+        switchView(activeTab);
+
+        // ទាញទិន្នន័យលើកដំបូង
+        fetchDashboardStats();
+        fetchCompanies();
+
+        // [មុខងារស្វ័យប្រវត្តិ] Auto-Refresh រៀងរាល់ ៤ វិនាទី
+        setInterval(() => {
+          fetchDashboardStats();
+          fetchCompanies();
+        }, 4000);
+      });
 
       function switchView(view) {
         ["overview", "companies"].forEach((v) => {
@@ -504,6 +524,9 @@
           view === "overview"
             ? "ទិដ្ឋភាពទូទៅ (System Overview)"
             : "គ្រប់គ្រងក្រុមហ៊ុន (Manage Billers)";
+
+        // កត់ចំណាំការចុច Tab ចូលក្នុង Local Storage
+        localStorage.setItem("admin_active_tab", view);
       }
 
       function logout() {
@@ -536,12 +559,23 @@
         try {
           const res = await fetch(`${API_URL}/admin/users`);
           const users = await res.json();
-          allCompaniesData = users.filter((u) => u.role === "company");
+          const newData = users.filter((u) => u.role === "company");
 
-          document.getElementById("companies-table-body").innerHTML =
-            allCompaniesData
-              .map(
-                (c) => `
+          // ឆែកមើលថាតើទិន្នន័យមានការប្រែប្រួលដែរឬទេ? (ការពារការលោត Refresh ញាក់ៗ)
+          const newHash = JSON.stringify(newData);
+          if (companiesHash !== newHash) {
+            companiesHash = newHash;
+            allCompaniesData = newData;
+            renderCompaniesTable();
+          }
+        } catch (error) {}
+      }
+
+      function renderCompaniesTable() {
+        document.getElementById("companies-table-body").innerHTML =
+          allCompaniesData
+            .map(
+              (c) => `
             <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
               <td class="px-6 py-4">
                 <div class="font-bold text-slate-800">${c.name}</div>
@@ -570,11 +604,10 @@
               </td>
             </tr>
           `,
-              )
-              .join("") ||
-            '<tr><td colspan="6" class="text-center py-12 text-slate-400">មិនមានទិន្នន័យទេ</td></tr>';
-          lucide.createIcons();
-        } catch (error) {}
+            )
+            .join("") ||
+          '<tr><td colspan="6" class="text-center py-12 text-slate-400">មិនមានទិន្នន័យទេ</td></tr>';
+        lucide.createIcons();
       }
 
       // --- U-PAY Account Verification System ---
@@ -604,7 +637,6 @@
         });
 
         try {
-          // ហៅទៅកាន់ Cloud U-PAY នៅលើ Render ផ្ទាល់តែម្តង
           const res = await fetch(
             `https://u-pay-bank.onrender.com/api/bank/verify-account/${accNo}`,
           );
@@ -642,7 +674,7 @@
       // --- Add/Edit Modal ---
       function openCompanyModal(companyId = null) {
         document.getElementById("company-modal").classList.remove("hidden");
-        resetVerification(); // ត្រូវ Check គណនីថ្មីរហូត
+        resetVerification();
 
         if (companyId) {
           const c = allCompaniesData.find((u) => u.id === companyId);
@@ -750,7 +782,10 @@
               `ប្តូរស្ថានភាពទៅជា ${newStatus.toUpperCase()}`,
               "success",
             );
-            fetchCompanies(); // Reload Table
+
+            // បញ្ជាឱ្យទាញទិន្នន័យដើម្បី Update UI ភ្លាមៗដោយបង្ខំ
+            companiesHash = "";
+            fetchCompanies();
           }
         } catch (e) {
           showToast("បរាជ័យក្នុងការប្តូរស្ថានភាព", "error");
@@ -774,6 +809,7 @@
               });
               if (res.ok) {
                 showToast("លុបជោគជ័យ", "success");
+                companiesHash = "";
                 fetchCompanies();
                 fetchDashboardStats();
               }
@@ -794,8 +830,6 @@
           setTimeout(() => t.remove(), 300);
         }, 3000);
       }
-
-      fetchDashboardStats();
     </script>
   </body>
 </html>
