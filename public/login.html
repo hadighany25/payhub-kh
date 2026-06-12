@@ -201,15 +201,18 @@
     <script>
       lucide.createIcons();
 
-      // ទាញយកឈ្មោះក្រុមហ៊ុនពី Server មកដាក់ក្នុង Dropdown
+      // -------------------------------------------------------------
+      // ទាញយកឈ្មោះក្រុមហ៊ុនពី Server (ប្តូរទៅកាន់ Render URL)
+      // -------------------------------------------------------------
       document.addEventListener("DOMContentLoaded", async () => {
         try {
-          const res = await fetch("/api/companies");
+          const res = await fetch(
+            "https://payhub-kh.onrender.com/api/companies",
+          );
           if (res.ok) {
             const companies = await res.json();
             const select = document.getElementById("company");
 
-            // សម្អាតចោលសិន
             select.innerHTML =
               '<option value="" disabled selected>-- សូមជ្រើសរើសក្រុមហ៊ុន --</option>';
 
@@ -285,19 +288,24 @@
           btn.disabled = true;
 
           try {
-            const res = await fetch("/api/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ role, company, email, password }),
-            });
+            // -------------------------------------------------------------
+            // បញ្ជូនទិន្នន័យ Login ទៅកាន់ Render URL
+            // -------------------------------------------------------------
+            const res = await fetch(
+              "https://payhub-kh.onrender.com/api/login",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ role, company, email, password }),
+              },
+            );
             const data = await res.json();
 
             if (res.ok) {
-              // [ជួសជុលបញ្ហាត្រង់នេះ] ទាញយកទិន្នន័យ (Rate & Type) មកទុក
               const sessionData = {
                 isLoggedIn: true,
                 role,
-                ...data.user, // ទាញយក Data User ទាំងអស់ដែល Admin បានបង្កើតពី Server
+                ...data.user,
                 company: role === "company" ? data.user.name : "All",
               };
               localStorage.setItem(

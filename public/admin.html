@@ -480,10 +480,13 @@
     <script>
       lucide.createIcons();
       let allCompaniesData = [];
-      let isAccountVerified = false; // Flag សំរាប់ Check ថាបាន Verify U-PAY នៅ
+      let isAccountVerified = false;
 
-      const API_URL = "http://localhost:4000/api";
-      const UPAY_API = "http://localhost:3000/api/bank";
+      // -------------------------------------------------------------
+      // ទីតាំងដែលបានកែប្រែ API URL
+      // -------------------------------------------------------------
+      const API_URL = "https://payhub-kh.onrender.com/api";
+      const UPAY_API = "https://u-pay-bank.onrender.com/api/bank";
 
       function switchView(view) {
         ["overview", "companies"].forEach((v) => {
@@ -629,11 +632,7 @@
           }
         } catch (e) {
           Swal.close();
-          Swal.fire(
-            "Error",
-            "មិនអាចភ្ជាប់ទៅកាន់ U-PAY Server ទេ! សូមប្រាកដថា Port 3000 កំពុងដើរ",
-            "error",
-          );
+          Swal.fire("Error", "មិនអាចភ្ជាប់ទៅកាន់ U-PAY Server ទេ!", "error");
         }
       }
 
