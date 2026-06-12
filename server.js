@@ -16,8 +16,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // ១. តភ្ជាប់ទៅកាន់ MongoDB Atlas (ប្រើ Password ថ្មី)
 // -------------------------------------------------------------
 const MONGO_URI =
-  "mongodb+srv://hadighany25_db_user:qI7Xc8IYSIdwupTU@cluster0.izzf48u.mongodb.net/payhub_db?appName=Cluster0";
-
+  "mongodb+srv://hadighany25_db_user:YNGQgEp2Pz6V8LWX@cluster0.izzf48u.mongodb.net/payhub_db?appName=Cluster0";
 mongoose
   .connect(MONGO_URI)
   .then(() => {
