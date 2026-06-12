@@ -6,21 +6,18 @@ const mongoose = require("mongoose");
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// អនុញ្ញាតឱ្យ Frontend ពីគ្រប់ Domain អាចហៅ API នេះបាន (ចាំបាច់សម្រាប់ GitHub Pages)
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  }),
-);
+app.use(cors());
 app.use(express.json());
 
+// ប្រាប់ Server ឱ្យអានឯកសារ HTML ពីក្នុង Folder "public"
+app.use(express.static(path.join(__dirname, "public")));
+
 // -------------------------------------------------------------
-// ១. តភ្ជាប់ទៅកាន់ MongoDB Atlas
+// ១. តភ្ជាប់ទៅកាន់ MongoDB Atlas (ប្រើ Password ថ្មី)
 // -------------------------------------------------------------
 const MONGO_URI =
   "mongodb+srv://hadighany25_db_user:qI7Xc8IYSIdwupTU@cluster0.izzf48u.mongodb.net/payhub_db?appName=Cluster0";
+
 mongoose
   .connect(MONGO_URI)
   .then(() => {
@@ -101,8 +98,9 @@ const checkSuperAdmin = async () => {
 // ៣. ROUTES & APIs
 // -------------------------------------------------------------
 
+// ពេលវាយលីង Render បើកផ្ទាំង Login ភ្លាម
 app.get("/", (req, res) => {
-  res.send("PayHub API Server is Running!");
+  res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
 // --- LOGIN ---
