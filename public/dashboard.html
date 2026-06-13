@@ -782,7 +782,7 @@
               </div>
               <div class="flex gap-3 mb-3">
                 <div
-                  class="w-[55%] border border-blue-500 rounded-sm p-3 relative mt-3 bg-blue-50/10"
+                  class="w-[55%] border border-blue-500 rounded-sm p-3 relative mt-2 bg-blue-50/10 overflow-hidden"
                 >
                   <div
                     class="absolute -top-2.5 left-4 bg-white px-2 text-[11px] font-bold text-blue-600"
@@ -839,10 +839,12 @@
                     >
                       ប្រវត្តិប្រើប្រាស់ ១២ខែចុងក្រោយ
                     </div>
+
                     <div
                       id="slip-history-grid"
-                      class="grid grid-cols-4 gap-x-2 gap-y-1 text-gray-800 font-medium h-[180px] overflow-hidden font-mono"
+                      class="grid grid-rows-6 grid-flow-col gap-x-4 gap-y-1 text-gray-800 font-medium h-[180px] overflow-hidden font-mono text-[10px] w-full px-1"
                     ></div>
+
                     <div
                       class="flex justify-between border-t border-blue-300 mt-2 pt-2 font-bold text-black text-[11px]"
                     >
@@ -863,7 +865,7 @@
                     </div>
                   </div>
                   <div
-                    class="border border-blue-500 text-[10px] p-2 text-gray-800 bg-blue-50/30 flex-1 leading-relaxed rounded-sm"
+                    class="border border-blue-500 text-[10px] p-2 text-gray-800 bg-blue-50/30 flex-1 leading-relaxed rounded-sm overflow-hidden"
                   >
                     <span class="font-bold text-rose-600">* ចំណាំ៖</span>
                     សូមបង់ប្រាក់ឱ្យបានទាន់ពេលវេលាដើម្បីបញ្ចៀសការកាត់ផ្តាច់សេវាកម្ម។<br />
@@ -1619,7 +1621,6 @@
           `<tr><td colspan="6" class="text-center py-12 text-slate-400">មិនមានទិន្នន័យ</td></tr>`;
       }
 
-      // ប្រព័ន្ធការពារការគាំង (Anti-Crash DOM Setter)
       const setElsText = (id, txt) => {
         document
           .querySelectorAll(`#${id}`)
@@ -1658,7 +1659,7 @@
             );
           }
 
-          // ទាញ Logo ពី UPAY
+          // ទាញ Logo ពី U-PAY
           const logoContainer = document.getElementById(
             "slip-dynamic-logo-letter",
           );
@@ -1735,24 +1736,24 @@
           setElsText("edc-total-mid", `$${totalGrandUsd.toFixed(2)}`);
           setElsText("edc-total1", `$${totalGrandUsd.toFixed(2)}`);
 
-          // ដោះស្រាយបញ្ហាជាន់អក្សរ ដោយបំបែកបន្ទាត់លើ-ក្រោម
+          // ដាក់ជាជួរតែមួយ (Inline)
           setElsHtml(
             "edc-total-main",
-            `<div class="flex flex-col items-end leading-tight pr-1"><span class="text-[#004890] font-bold text-[18px]">$${totalGrandUsd.toFixed(2)}</span><span class="text-slate-500 text-[13px] font-bold">${totalRiel} ៛</span></div>`,
+            `<span class="text-[#004890] font-bold">$${totalGrandUsd.toFixed(2)}</span> <span class="text-slate-500 font-bold mx-1">/</span> <span class="text-slate-500 font-bold">${totalRiel} ៛</span>`,
           );
           setElsHtml(
             "edc-total3",
-            `<div class="flex flex-col items-end leading-tight"><span class="text-[#004890] font-bold text-[15px]">$${totalGrandUsd.toFixed(2)}</span><span class="text-slate-500 text-[12px] font-bold">${totalRiel} ៛</span></div>`,
+            `<span class="text-[#004890] font-bold text-[14px]">$${totalGrandUsd.toFixed(2)}</span> <span class="text-slate-500 font-bold mx-1">/</span> <span class="text-slate-500 text-[12px] font-bold">${totalRiel} ៛</span>`,
           );
 
           // បញ្ចូលលេខទូរស័ព្ទ និង ឈ្មោះត្រា
           setElsHtml(
             "slip-company-contact",
-            `សាខាកណ្តាល រាជធានីភ្នំពេញ <br/> Hotline Tel: ${session.phone || "012 345 678"}`,
+            `អាសយដ្ឋានក្រុមហ៊ុន<br/> Hotline Tel: ${session.phone || "012 345 678"}`,
           );
           setElsText("edc-stamp-name", session.name || companyName);
 
-          // ប្រវត្តិប្រើប្រាស់ (រៀបតាមខែ ពីចាស់ទៅថ្មី)
+          // ក្រាហ្វិកប្រវត្តិប្រើប្រាស់ ១២ខែចុងក្រោយ (រៀបពីលើចុះក្រោម ឆ្វេងទៅស្តាំ)
           const historyGrid = document.getElementById("slip-history-grid");
           let customerBills = allBillsData.filter(
             (b) => b.consumer_no === consumerNo && b.month <= billInfo.month,
@@ -1780,10 +1781,10 @@
               totalUsage += bUsage;
               const [yyyy, mm] = (b.month || "").split("-");
               const shortYear = yyyy ? yyyy.substring(2) : "00";
-              historyHtml += `<div>20/${mm}/${shortYear}</div><div class="text-right text-[#005bb5] font-bold">${bUsage.toLocaleString()}</div>`;
+              historyHtml += `<div class="flex justify-between items-center px-1 border-b border-gray-100 border-dashed"><span class="text-gray-500">20/${mm}/${shortYear}</span><span class="text-[#005bb5] font-bold">${bUsage.toLocaleString()}</span></div>`;
               points.push(bUsage);
             } else {
-              historyHtml += `<div class="text-gray-400">--/--/--</div><div class="text-right text-gray-400">0</div>`;
+              historyHtml += `<div class="flex justify-between items-center px-1 border-b border-gray-100 border-dashed"><span class="text-gray-400">--/--/--</span><span class="text-gray-400">0</span></div>`;
               points.push(0);
             }
           });
