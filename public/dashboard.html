@@ -236,16 +236,6 @@
             ដំណើរការទិន្នន័យថ្ងៃនេះ
           </p>
         </div>
-        <div class="flex items-center gap-4">
-          <button
-            class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 relative transition"
-          >
-            <i data-lucide="bell" class="w-5 h-5"></i
-            ><span
-              class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"
-            ></span>
-          </button>
-        </div>
       </header>
 
       <div class="flex-1 overflow-y-auto p-8 relative">
@@ -392,8 +382,8 @@
                     <label
                       class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex justify-between"
                     >
-                      <span>លេខកូដអតិថិជន</span>
-                      <span
+                      <span>លេខកូដអតិថិជន</span
+                      ><span
                         class="text-indigo-400 font-normal lowercase text-[10px]"
                         >(ទុកទទេដើម្បីបង្កើតថ្មី)</span
                       >
@@ -603,7 +593,9 @@
                       <th class="px-5 py-3 font-semibold">លេខរៀង (Bill ID)</th>
                       <th class="px-5 py-3 font-semibold">អតិថិជន</th>
                       <th class="px-5 py-3 font-semibold">ខែ</th>
-                      <th class="px-5 py-3 font-semibold">ទឹកប្រាក់</th>
+                      <th class="px-5 py-3 font-semibold">
+                        ទឹកប្រាក់ (រួម Fee)
+                      </th>
                       <th class="px-5 py-3 font-semibold">ស្ថានភាព</th>
                       <th class="px-5 py-3 font-semibold text-right">
                         សកម្មភាព
@@ -864,7 +856,7 @@
                     >
                       <span class="text-blue-800">ប្រើប្រាស់ជាមធ្យមខែនេះ</span
                       ><span id="slip-avg-usage" class="text-blue-600 font-mono"
-                        >0kWh</span
+                        >0</span
                       >
                     </div>
                     <div
@@ -940,7 +932,7 @@
                         <th class="p-1.5 border-r border-blue-200 font-bold">
                           តម្លៃឯកតា
                         </th>
-                        <th class="p-1.5 font-bold">តម្លៃសរុប</th>
+                        <th class="p-1.5 font-bold">តម្លៃប្រើប្រាស់</th>
                       </tr>
                     </thead>
                     <tbody class="text-gray-800 font-mono">
@@ -976,13 +968,30 @@
                           ...
                         </td>
                       </tr>
+                      <tr
+                        class="border-b border-gray-100 hover:bg-gray-50 bg-blue-50/20"
+                      >
+                        <td
+                          colspan="4"
+                          class="p-2 border-r border-gray-200 text-right font-semibold text-blue-800 text-[11px]"
+                        >
+                          ថ្លៃសេវាបន្ថែម (Fee
+                          <span id="edc-fee-percent">0</span>%)
+                        </td>
+                        <td
+                          class="p-2 text-right pr-3 font-bold text-rose-600 text-[12px]"
+                          id="edc-fee-amount"
+                        >
+                          ...
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                   <div
                     class="flex justify-between px-3 mt-4 font-bold text-[13px] text-black border-t-2 border-blue-500 pt-2 w-[90%] mx-auto bg-blue-50 rounded-lg p-2 shadow-sm"
                   >
                     <span class="edc-font-moul tracking-widest text-[#004890]"
-                      >សរុប</span
+                      >សរុបរួម</span
                     ><span
                       id="edc-total-mid"
                       class="text-[14px] font-mono text-right"
@@ -1278,13 +1287,11 @@
     ></div>
 
     <script>
-      // ប្រកាសអថេរ
       let allBillsData = [];
-      let billsHash = ""; // សម្រាប់ការពារ UI លោតញាក់ៗពេល Auto-Refresh
+      let billsHash = "";
       let revenueChartInstance = null;
       let statusChartInstance = null;
 
-      // ១. កែប្រែលីង API (Fixed) -> លែងគាំងហើយ!
       const API_URL = "/api";
 
       const safeStr = (val) => (val || "").toString().toLowerCase();
@@ -1329,7 +1336,6 @@
             day: "numeric",
           });
 
-        // ២. បញ្ចូលតម្លៃ Rate និង Fee របស់ក្រុមហ៊ុនមកបង្ហាញ (Fixed)
         const rate = Number(session.rate) || 0;
         const fee = Number(session.fee_percent) || 0;
         document.getElementById("rate").value = rate;
@@ -1344,14 +1350,11 @@
 
         calculateAdvancedAmount();
 
-        // ៣. រក្សាទុកទំព័រពេល Refresh
         const activeTab =
           localStorage.getItem("dashboard_active_tab") || "dashboard";
         switchView(activeTab);
-
         fetchData();
 
-        // ៤. ដំណើរការ Auto-Refresh Live Data មិនញាក់ UI
         setInterval(async () => {
           try {
             const query =
@@ -1401,8 +1404,6 @@
           customers: "អតិថិជន (Customers)",
         };
         document.getElementById("page-title").textContent = viewTitles[view];
-
-        // រក្សាទុក Tab បច្ចុប្បន្ន
         localStorage.setItem("dashboard_active_tab", view);
       }
 
@@ -1437,7 +1438,7 @@
           if (!res.ok) throw new Error("Network Error");
 
           allBillsData = await res.json();
-          billsHash = JSON.stringify(allBillsData); // កត់ចំណាំ Data
+          billsHash = JSON.stringify(allBillsData);
           processAllData();
         } catch (error) {
           console.warn("Fetch Error", error);
@@ -1589,9 +1590,15 @@
 
         const companyName = session.company || "PAYHUB KH";
         const consumerNo = billInfo.consumer_no;
-        const amount = Number(billInfo.total_amount_usd) || 0;
+        const totalGrandUsd = Number(billInfo.total_amount_usd) || 0;
         const rate = Number(billInfo.rate || session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
         const qty = Number(billInfo.usage_details) || 0;
+
+        // គណនាការប្រើប្រាស់ និង Fee ត្រលប់មកវិញពី Total
+        const subtotal = qty * rate;
+        let feeAmt = totalGrandUsd - subtotal;
+        if (feeAmt < 0) feeAmt = 0;
 
         document.getElementById("slip-dynamic-company-kh").textContent =
           companyName;
@@ -1648,42 +1655,54 @@
         document.getElementById("edc-new-read").textContent = newRead
           .toString()
           .padStart(7, "0");
+
+        // បង្ហាញទិន្នន័យជាក់ស្តែង (តម្លៃប្រើប្រាស់ និង Fee)
         document.getElementById("edc-qty").textContent = qty.toLocaleString();
         document.getElementById("edc-rate-table").textContent =
           `$${rate.toFixed(2)}`;
-
-        const totalRiel = Math.round(amount * 4000).toLocaleString();
         document.getElementById("edc-subtotal").textContent =
-          `$${amount.toFixed(2)}`;
+          `$${subtotal.toFixed(2)}`;
+        document.getElementById("edc-fee-percent").textContent = feePercent;
+        document.getElementById("edc-fee-amount").textContent =
+          `$${feeAmt.toFixed(2)}`;
+
+        const totalRiel = Math.round(totalGrandUsd * 4000).toLocaleString();
         document.getElementById("edc-total-mid").textContent =
-          `$${amount.toFixed(2)}`;
+          `$${totalGrandUsd.toFixed(2)}`;
         document.getElementById("edc-total1").textContent =
-          `$${amount.toFixed(2)}`;
+          `$${totalGrandUsd.toFixed(2)}`;
 
         document.getElementById("edc-total-main").innerHTML =
-          `<span class="text-[#004890] mr-1">$${amount.toFixed(2)}</span> / <span class="ml-1">${totalRiel} ៛</span>`;
+          `<span class="text-[#004890] mr-1">$${totalGrandUsd.toFixed(2)}</span> / <span class="ml-1">${totalRiel} ៛</span>`;
         document.getElementById("edc-total3").innerHTML =
-          `<span class="text-[#004890] text-[15px] font-bold block">$${amount.toFixed(2)}</span><span class="text-[12px] block text-slate-500">${totalRiel} ៛</span>`;
+          `<span class="text-[#004890] text-[15px] font-bold block">$${totalGrandUsd.toFixed(2)}</span><span class="text-[12px] block text-slate-500">${totalRiel} ៛</span>`;
 
-        // ប្រវត្តិប្រើប្រាស់
+        // ប្រវត្តិប្រើប្រាស់ (រៀបតាមខែ ពីចាស់ទៅថ្មី)
         const historyGrid = document.getElementById("slip-history-grid");
-        let customerBills = allBillsData
-          .filter(
-            (b) => b.consumer_no === consumerNo && b.month <= billInfo.month,
-          )
-          .sort((a, b) => (b.month || "").localeCompare(a.month || ""));
+        let customerBills = allBillsData.filter(
+          (b) => b.consumer_no === consumerNo && b.month <= billInfo.month,
+        );
+
+        // Sort Ascending (Oldest to Newest)
+        customerBills.sort((a, b) =>
+          (a.month || "").localeCompare(b.month || ""),
+        );
+
+        let recent12 = customerBills.slice(-12);
+        const paddedBills = Array(12).fill(null);
+        const startIndex = 12 - recent12.length;
+        for (let i = 0; i < recent12.length; i++) {
+          paddedBills[startIndex + i] = recent12[i];
+        }
 
         let historyHtml = "";
         let totalUsage = 0;
-        let count = 0;
         let points = [];
 
-        for (let i = 0; i < 12; i++) {
-          if (i < customerBills.length) {
-            const b = customerBills[i];
+        paddedBills.forEach((b) => {
+          if (b) {
             const bUsage = Number(b.usage_details) || 0;
             totalUsage += bUsage;
-            count++;
             const [yyyy, mm] = (b.month || "").split("-");
             const shortYear = yyyy ? yyyy.substring(2) : "00";
             historyHtml += `<div>20/${mm}/${shortYear}</div><div class="text-right text-[#005bb5] font-bold">${bUsage.toLocaleString()}</div>`;
@@ -1692,13 +1711,16 @@
             historyHtml += `<div class="text-gray-400">--/--/--</div><div class="text-right text-gray-400">0</div>`;
             points.push(0);
           }
-        }
+        });
+
         historyGrid.innerHTML = historyHtml;
         const avgUsage =
-          count > 0 ? (totalUsage / count).toFixed(2) : qty.toFixed(2);
+          recent12.length > 0
+            ? (totalUsage / recent12.length).toFixed(2)
+            : qty.toFixed(2);
         document.getElementById("slip-avg-usage").textContent = `${avgUsage}`;
 
-        points.reverse();
+        // គូរក្រាហ្វិកពីឆ្វេង(ចាស់) ទៅស្តាំ(ថ្មី)
         const maxPoint = Math.max(...points) || 1;
         let polylinePoints = points
           .map((p, i) => {
@@ -1720,7 +1742,7 @@
         }
 
         const qrData = encodeURIComponent(
-          `UPAY|${companyName}|${billId}|${amount}`,
+          `UPAY|${companyName}|${billId}|${totalGrandUsd}`,
         );
         document.getElementById("edc-qr").src =
           `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`;
@@ -1766,8 +1788,14 @@
 
       function calcEditBillAmount() {
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
         const qty = Number(document.getElementById("edit_field_3").value) || 0;
-        document.getElementById("edit_field_4").value = (qty * rate).toFixed(2);
+
+        const subtotal = qty * rate;
+        const fee = subtotal * (feePercent / 100);
+        document.getElementById("edit_field_4").value = (
+          subtotal + fee
+        ).toFixed(2);
       }
 
       document
@@ -1873,6 +1901,7 @@
 
       function calculateAdvancedAmount() {
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
         const oldRead =
           Number(document.getElementById("old_reading").value) || 0;
         const newRead =
@@ -1885,16 +1914,24 @@
         } else {
           qty = Number(document.getElementById("usage_details").value) || 0;
         }
+
+        // គណនា Subtotal រួចបូកបញ្ជូល Fee
+        const subtotal = qty * rate;
+        const fee = subtotal * (feePercent / 100);
         document.getElementById("total_amount_usd").value = (
-          qty * rate
+          subtotal + fee
         ).toFixed(2);
       }
 
       function calculateAutoAmount() {
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
         const qty = Number(document.getElementById("usage_details").value) || 0;
+
+        const subtotal = qty * rate;
+        const fee = subtotal * (feePercent / 100);
         document.getElementById("total_amount_usd").value = (
-          qty * rate
+          subtotal + fee
         ).toFixed(2);
       }
 
@@ -2023,7 +2060,11 @@
               fetchData();
               document.getElementById("billForm").reset();
               document.getElementById("company").value = session.company;
+
               document.getElementById("rate").value = session.rate || 0;
+              document.getElementById("fee-hint").textContent =
+                `សេវាកាត់: ${session.fee_percent || 0}%`;
+
               document.getElementById("issue_date").value = new Date()
                 .toISOString()
                 .split("T")[0];
@@ -2047,15 +2088,20 @@
       }
       function calcMeterRow(id) {
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
         const oldM =
           Number(document.getElementById(`bulk-old-${id}`).value) || 0;
         const newM =
           Number(document.getElementById(`bulk-new-${id}`).value) || 0;
         let qty = newM - oldM;
         if (qty < 0) qty = 0;
+
+        const subtotal = qty * rate;
+        const fee = subtotal * (feePercent / 100);
+
         document.getElementById(`bulk-qty-${id}`).value = qty;
         document.getElementById(`bulk-total-${id}`).value = (
-          qty * rate
+          subtotal + fee
         ).toFixed(2);
       }
       async function submitBulkRow(cNo, cName) {
@@ -2125,6 +2171,9 @@
           document.getElementById("bulk-global-month").value ||
           new Date().toISOString().slice(0, 7);
         const r = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
+        const subtotal = 1 * r;
+        const t = subtotal + subtotal * (feePercent / 100);
 
         Swal.fire({
           title: "បញ្ជាក់",
@@ -2166,7 +2215,7 @@
                     due_date: dDateStr,
                     usage_details: 1,
                     rate: r,
-                    total_amount_usd: r,
+                    total_amount_usd: t,
                   }),
                 });
                 s++;
@@ -2194,6 +2243,11 @@
           new Date().toISOString().slice(0, 7);
         const isMeter = session.type === "meter";
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
+
+        const defaultSubtotal = 1 * rate;
+        const defaultTotal =
+          defaultSubtotal + defaultSubtotal * (feePercent / 100);
 
         document.getElementById("bulk-subtitle").textContent = isMeter
           ? "បញ្ចូលលេខកុងទ័រចាស់ និងថ្មី"
@@ -2206,7 +2260,7 @@
           document.getElementById("btn-auto-generate").classList.add("hidden");
 
         document.getElementById("bulk-table-head").innerHTML =
-          `<tr><th class="px-6 py-3 font-semibold">អតិថិជន / លេខកូដ</th><th class="px-6 py-3 w-40 font-semibold">សម្រាប់ខែ</th>${isMeter ? '<th class="px-6 py-3 w-32 font-semibold">កុងទ័រចាស់</th><th class="px-6 py-3 w-32 font-semibold">កុងទ័រថ្មី</th><th class="px-6 py-3 w-24 font-semibold">ប្រើប្រាស់</th>' : '<th class="px-6 py-3 w-32 font-semibold">តម្លៃថេរ</th>'}<th class="px-6 py-3 w-32 font-semibold">សរុប (USD)</th><th class="px-6 py-3 text-right font-semibold">សកម្មភាព</th></tr>`;
+          `<tr><th class="px-6 py-3 font-semibold">អតិថិជន / លេខកូដ</th><th class="px-6 py-3 w-40 font-semibold">សម្រាប់ខែ</th>${isMeter ? '<th class="px-6 py-3 w-32 font-semibold">កុងទ័រចាស់</th><th class="px-6 py-3 w-32 font-semibold">កុងទ័រថ្មី</th><th class="px-6 py-3 w-24 font-semibold">ប្រើប្រាស់</th>' : '<th class="px-6 py-3 w-32 font-semibold">តម្លៃថេរ</th>'}<th class="px-6 py-3 w-32 font-semibold">សរុប (រួម Fee)</th><th class="px-6 py-3 text-right font-semibold">សកម្មភាព</th></tr>`;
 
         document.getElementById("bulk-table-body").innerHTML =
           Object.values(unique)
@@ -2218,7 +2272,7 @@
                 cBills.length > 0
                   ? cBills[0].new_reading || cBills[0].usage_details || 0
                   : 0;
-              return `<tr class="hover:bg-slate-50 border-b border-slate-50" id="bulk-row-${c.consumer_no}"><td class="px-6 py-3"><div class="font-bold text-slate-800">${c.customer_name || "N/A"}</div><div class="text-xs text-slate-500 font-mono">${c.consumer_no}</div></td><td class="px-6 py-3"><input type="month" value="${m}" id="bulk-month-${c.consumer_no}" class="border border-slate-200 rounded-lg p-1.5 text-sm w-full outline-none focus:ring-2 focus:ring-indigo-500"></td>${isMeter ? `<td class="px-6 py-3"><input type="number" id="bulk-old-${c.consumer_no}" value="${lastRead}" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full outline-none font-mono focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-new-${c.consumer_no}" placeholder="0" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full font-mono outline-none focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none font-semibold text-slate-600" value="0"></td>` : `<td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none text-center font-semibold text-slate-600" value="1"></td>`}<td class="px-6 py-3"><input type="text" id="bulk-total-${c.consumer_no}" readonly class="bg-indigo-50/50 text-indigo-700 font-bold border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none" value="${!isMeter ? rate.toFixed(2) : "0.00"}"></td><td class="px-6 py-3 text-right"><button onclick="submitBulkRow('${c.consumer_no}', '${escapeHtml(c.customer_name)}')" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-xs font-bold ml-auto flex items-center gap-1.5 hover:bg-emerald-100 transition-colors shadow-sm"><i data-lucide="send" class="w-3.5 h-3.5"></i> ${isMeter ? "ចេញវិក្កយបត្រ" : "Issue Bill"}</button></td></tr>`;
+              return `<tr class="hover:bg-slate-50 border-b border-slate-50" id="bulk-row-${c.consumer_no}"><td class="px-6 py-3"><div class="font-bold text-slate-800">${c.customer_name || "N/A"}</div><div class="text-xs text-slate-500 font-mono">${c.consumer_no}</div></td><td class="px-6 py-3"><input type="month" value="${m}" id="bulk-month-${c.consumer_no}" class="border border-slate-200 rounded-lg p-1.5 text-sm w-full outline-none focus:ring-2 focus:ring-indigo-500"></td>${isMeter ? `<td class="px-6 py-3"><input type="number" id="bulk-old-${c.consumer_no}" value="${lastRead}" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full outline-none font-mono focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-new-${c.consumer_no}" placeholder="0" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full font-mono outline-none focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none font-semibold text-slate-600" value="0"></td>` : `<td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none text-center font-semibold text-slate-600" value="1"></td>`}<td class="px-6 py-3"><input type="text" id="bulk-total-${c.consumer_no}" readonly class="bg-indigo-50/50 text-indigo-700 font-bold border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none" value="${!isMeter ? defaultTotal.toFixed(2) : "0.00"}"></td><td class="px-6 py-3 text-right"><button onclick="submitBulkRow('${c.consumer_no}', '${escapeHtml(c.customer_name)}')" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-xs font-bold ml-auto flex items-center gap-1.5 hover:bg-emerald-100 transition-colors shadow-sm"><i data-lucide="send" class="w-3.5 h-3.5"></i> ${isMeter ? "ចេញវិក្កយបត្រ" : "Issue Bill"}</button></td></tr>`;
             })
             .join("") ||
           '<tr><td colspan="7" class="text-center py-12 text-slate-400">គ្មានទិន្នន័យ</td></tr>';
@@ -2260,7 +2314,7 @@
             <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button onclick="showCustomerSlip('${c.id}')" class="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition" title="វិក្កយបត្រចុងក្រោយ (Slip)"><i data-lucide="printer" class="w-4 h-4"></i></button>
-                  <button onclick="openEditModal('customer', '${c.id}', '${escapeHtml(c.name)}')" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition" title="កែប្រែឈ្មោះ (Edit Profile)"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                  <button onclick="editLatestCustomerBill('${c.id}')" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition" title="កែប្រែវិក្កយបត្រចុងក្រោយ"><i data-lucide="edit" class="w-4 h-4"></i></button>
                   <button onclick="deleteAction('customer', '${c.id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition" title="លុបអតិថិជន (Delete)"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </td>
@@ -2279,7 +2333,8 @@
           customerBills.sort((a, b) =>
             (b.month || "").localeCompare(a.month || ""),
           );
-          showSlip(customerBills[0].bill_id);
+          // យកវិក្កយបត្រចុងក្រោយគេ (Newest) មក Print
+          showSlip(customerBills[customerBills.length - 1].bill_id);
         } else {
           showToast("អតិថិជននេះមិនទាន់មានវិក្កយបត្រទេ!", "error");
         }
@@ -2296,6 +2351,25 @@
           t.classList.replace("toast-enter", "toast-leave");
           setTimeout(() => t.remove(), 300);
         }, 3000);
+      }
+
+      // Function នេះនឹងទាញរកវិក្កយបត្រចុងក្រោយរបស់អតិថិជន រួចហៅ Form Edit វិក្កយបត្រមកប្រើរួមគ្នា
+      function editLatestCustomerBill(consumerNo) {
+        const customerBills = allBillsData.filter(
+          (b) => b.consumer_no === consumerNo,
+        );
+        if (customerBills.length > 0) {
+          customerBills.sort((a, b) =>
+            (b.month || "").localeCompare(a.month || ""),
+          );
+          // ហៅ Form Edit របស់វិក្កយបត្រមកប្រើ (ប្រើ type='bill')
+          openEditModal(
+            "bill",
+            customerBills[customerBills.length - 1].bill_id,
+          );
+        } else {
+          showToast("មិនមានវិក្កយបត្រដើម្បីកែប្រែទេ!", "error");
+        }
       }
     </script>
   </body>
