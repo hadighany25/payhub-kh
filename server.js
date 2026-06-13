@@ -317,37 +317,49 @@ app.put("/api/customers/:consumer_no", async (req, res) => {
 // API នេះសម្រាប់ឱ្យ U-PAY App Scan QR Code រួចហៅមកសួររកវិក្កយបត្រ
 app.get("/api/gateway/check-bill", async (req, res) => {
   try {
-    const { query } = req.query; // អាចជាលេខ bill_id ឬ consumer_no
+    const { query } = req.query;
+
+    if (!query) {
+      return res
+        .status(400)
+        .json({ success: false, message: "សូមបញ្ចូលលេខវិក្កយបត្រ" });
+    }
+
+    // 🔥 បំប្លែង Query ទៅជា Regex ដើម្បីមិនប្រកាន់អក្សរតូចឬធំ (Case-insensitive) និងកាត់ចន្លោះចេញ
+    const safeQuery = new RegExp(`^${query.trim()}$`, "i");
+
+    // ស្វែងរកវិក្កយបត្រដែល Unpaid
     const bill = await Bill.findOne({
-      $or: [{ bill_id: query }, { consumer_no: query }],
-      status: "Unpaid",
+      $or: [{ bill_id: safeQuery }, { consumer_no: safeQuery }],
+      status: new RegExp("^Unpaid$", "i"),
     });
 
     if (bill) {
       const company = await User.findOne({
-        name: bill.company,
+        name: new RegExp(`^${bill.company}$`, "i"),
         role: "company",
       });
-      if (company && company.status === "inactive")
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "ក្រុមហ៊ុននេះត្រូវបានផ្អាកសេវាកម្មទូទាត់បណ្តោះអាសន្ន!",
-          });
 
-      // បោះទិន្នន័យពេញលេញទៅឱ្យ U-PAY App បង្ហាញលើទូរស័ព្ទអតិថិជន
+      if (company && company.status === "inactive") {
+        return res.status(403).json({
+          success: false,
+          message: "ក្រុមហ៊ុននេះត្រូវបានផ្អាកសេវាកម្មទូទាត់បណ្តោះអាសន្ន!",
+        });
+      }
+
+      // បោះទិន្នន័យពេញលេញទៅឱ្យ U-PAY App
       res.json({ success: true, bill });
     } else {
-      res
-        .status(404)
-        .json({
-          success: false,
-          message: "រកវិក្កយបត្រមិនឃើញ ឬបានទូទាត់រួចរាល់ហើយ!",
-        });
+      res.status(404).json({
+        success: false,
+        message: "រកវិក្កយបត្រមិនឃើញ ឬវិក្កយបត្រនេះត្រូវបានទូទាត់រួចរាល់ហើយ!",
+      });
     }
   } catch (err) {
-    res.status(500).json({ success: false, message: "Server Error" });
+    console.error("Gateway Check Bill Error:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error ក្នុងការស្វែងរក" });
   }
 });
 
