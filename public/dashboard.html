@@ -196,7 +196,7 @@
       <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
         <div class="flex items-center gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg"
+            class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg overflow-hidden"
             id="sidebar-avatar"
           >
             C
@@ -738,7 +738,7 @@
                   class="w-1/4 flex flex-col items-center justify-center pt-2"
                 >
                   <div
-                    class="w-16 h-16 border-[3px] border-blue-600 rounded-full flex items-center justify-center font-bold text-blue-600 text-3xl edc-font-moul shadow-sm bg-white"
+                    class="w-16 h-16 border-[3px] border-blue-600 rounded-full flex items-center justify-center font-bold text-blue-600 text-3xl edc-font-moul shadow-sm bg-white overflow-hidden"
                     id="slip-dynamic-logo-letter"
                   >
                     C
@@ -782,7 +782,7 @@
               </div>
               <div class="flex gap-3 mb-3">
                 <div
-                  class="w-[55%] border border-blue-500 rounded-sm p-3 relative mt-2 bg-blue-50/10 overflow-hidden"
+                  class="w-[55%] border border-blue-500 rounded-sm p-3 relative mt-3 bg-blue-50/10"
                 >
                   <div
                     class="absolute -top-2.5 left-4 bg-white px-2 text-[11px] font-bold text-blue-600"
@@ -863,7 +863,7 @@
                     </div>
                   </div>
                   <div
-                    class="border border-blue-500 text-[10px] p-2 text-gray-800 bg-blue-50/30 flex-1 leading-relaxed rounded-sm overflow-hidden"
+                    class="border border-blue-500 text-[10px] p-2 text-gray-800 bg-blue-50/30 flex-1 leading-relaxed rounded-sm"
                   >
                     <span class="font-bold text-rose-600">* ចំណាំ៖</span>
                     សូមបង់ប្រាក់ឱ្យបានទាន់ពេលវេលាដើម្បីបញ្ចៀសការកាត់ផ្តាច់សេវាកម្ម។<br />
@@ -1082,12 +1082,9 @@
                   </div>
                   <div
                     class="w-[50%] bg-blue-50 flex items-center justify-end pr-4 border-b border-blue-500 font-mono"
+                    id="edc-total-main"
                   >
-                    <span
-                      class="text-[20px] font-bold text-blue-900"
-                      id="edc-total-main"
-                      >...</span
-                    >
+                    ...
                   </div>
                 </div>
                 <div class="flex text-[12px]">
@@ -1336,11 +1333,36 @@
         document.getElementById("sidebar-company-name").textContent =
           session.company || "Unknown Biller";
         document.getElementById("sidebar-email").textContent = session.email;
-        document.getElementById("sidebar-avatar").textContent = (
-          session.company || "C"
-        )
-          .charAt(0)
-          .toUpperCase();
+
+        // ទាញយក Logo ដាក់លើ Sidebar (ប្រសិនបើមាន) បើមិនមានដាក់អក្សរទី១
+        const sidebarAvatar = document.getElementById("sidebar-avatar");
+        if (session.upay_account) {
+          fetch(
+            `https://u-pay-bank.onrender.com/api/bank/verify-account/${session.upay_account}`,
+          )
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.success && data.profile_pic) {
+                sidebarAvatar.innerHTML = `<img src="${data.profile_pic}" class="w-full h-full object-cover">`;
+                sidebarAvatar.classList.remove("p-2");
+              } else {
+                sidebarAvatar.textContent = (session.company || "C")
+                  .charAt(0)
+                  .toUpperCase();
+              }
+            })
+            .catch(
+              (e) =>
+                (sidebarAvatar.textContent = (session.company || "C")
+                  .charAt(0)
+                  .toUpperCase()),
+            );
+        } else {
+          sidebarAvatar.textContent = (session.company || "C")
+            .charAt(0)
+            .toUpperCase();
+        }
+
         document.getElementById("current-date").textContent =
           new Date().toLocaleDateString("km-KH", {
             weekday: "long",
@@ -1612,7 +1634,7 @@
         document.querySelectorAll(`#${id}`).forEach((el) => (el.src = src));
       };
 
-      function showSlip(billId) {
+      async function showSlip(billId) {
         try {
           const billInfo = allBillsData.find((b) => b.bill_id === billId);
           if (!billInfo) return showToast("រកមិនឃើញវិក្កយបត្រនេះទេ", "error");
@@ -1626,7 +1648,7 @@
           // គណនាការប្រើប្រាស់ និង Fee ត្រលប់មកវិញពី Total
           const subtotal = qty * rate;
           let feeAmt = totalGrandUsd - subtotal;
-          if (feeAmt < 0) feeAmt = 0;
+          if (feeAmt < 0.01) feeAmt = 0; // ការពារលេខក្បៀសវែង
 
           // រកភាគរយ Fee ជាក់ស្តែង
           let actualFeePercent = session.fee_percent || 0;
@@ -1636,12 +1658,27 @@
             );
           }
 
+          // ទាញ Logo ពី UPAY
+          const logoContainer = document.getElementById(
+            "slip-dynamic-logo-letter",
+          );
+          if (logoContainer) {
+            logoContainer.innerHTML = companyName.charAt(0).toUpperCase(); // Default
+            if (session.upay_account) {
+              try {
+                const upRes = await fetch(
+                  `https://u-pay-bank.onrender.com/api/bank/verify-account/${session.upay_account}`,
+                );
+                const upData = await upRes.json();
+                if (upData.success && upData.profile_pic) {
+                  logoContainer.innerHTML = `<img src="${upData.profile_pic}" class="w-full h-full rounded-full object-cover" />`;
+                }
+              } catch (e) {}
+            }
+          }
+
           setElsText("slip-dynamic-company-kh", companyName);
           setElsText("slip-dynamic-company-en", companyName.toUpperCase());
-          setElsText(
-            "slip-dynamic-logo-letter",
-            companyName.charAt(0).toUpperCase(),
-          );
           setElsText(
             "stamp-circular-company",
             companyName.toUpperCase() + " SERVICE",
@@ -1698,13 +1735,14 @@
           setElsText("edc-total-mid", `$${totalGrandUsd.toFixed(2)}`);
           setElsText("edc-total1", `$${totalGrandUsd.toFixed(2)}`);
 
+          // ដោះស្រាយបញ្ហាជាន់អក្សរ ដោយបំបែកបន្ទាត់លើ-ក្រោម
           setElsHtml(
             "edc-total-main",
-            `<span class="text-[#004890] mr-1">$${totalGrandUsd.toFixed(2)}</span> / <span class="ml-1">${totalRiel} ៛</span>`,
+            `<div class="flex flex-col items-end leading-tight pr-1"><span class="text-[#004890] font-bold text-[18px]">$${totalGrandUsd.toFixed(2)}</span><span class="text-slate-500 text-[13px] font-bold">${totalRiel} ៛</span></div>`,
           );
           setElsHtml(
             "edc-total3",
-            `<span class="text-[#004890] text-[15px] font-bold block">$${totalGrandUsd.toFixed(2)}</span><span class="text-[12px] block text-slate-500">${totalRiel} ៛</span>`,
+            `<div class="flex flex-col items-end leading-tight"><span class="text-[#004890] font-bold text-[15px]">$${totalGrandUsd.toFixed(2)}</span><span class="text-slate-500 text-[12px] font-bold">${totalRiel} ៛</span></div>`,
           );
 
           // បញ្ចូលលេខទូរស័ព្ទ និង ឈ្មោះត្រា
