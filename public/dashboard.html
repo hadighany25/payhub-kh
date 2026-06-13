@@ -370,7 +370,8 @@
                     <label
                       class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
                       >ក្រុមហ៊ុន (Biller)</label
-                    ><input
+                    >
+                    <input
                       type="text"
                       id="company"
                       readonly
@@ -409,7 +410,8 @@
                     <label
                       class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
                       >ឈ្មោះអតិថិជន <span class="text-rose-500">*</span></label
-                    ><input
+                    >
+                    <input
                       type="text"
                       id="customer_name"
                       required
@@ -422,7 +424,8 @@
                       <label
                         class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
                         >សម្រាប់ខែ <span class="text-rose-500">*</span></label
-                      ><input
+                      >
+                      <input
                         type="month"
                         id="month"
                         required
@@ -433,7 +436,8 @@
                       <label
                         class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
                         >ថ្ងៃចេញ <span class="text-rose-500">*</span></label
-                      ><input
+                      >
+                      <input
                         type="date"
                         id="issue_date"
                         required
@@ -446,7 +450,8 @@
                         class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
                         >ថ្ងៃផុតកំណត់
                         <span class="text-rose-500">*</span></label
-                      ><input
+                      >
+                      <input
                         type="date"
                         id="due_date"
                         required
@@ -462,7 +467,8 @@
                       <label
                         class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
                         >អំណានចាស់</label
-                      ><input
+                      >
+                      <input
                         type="number"
                         id="old_reading"
                         oninput="calculateAdvancedAmount()"
@@ -474,7 +480,8 @@
                       <label
                         class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
                         >អំណានថ្មី</label
-                      ><input
+                      >
+                      <input
                         type="number"
                         id="new_reading"
                         oninput="calculateAdvancedAmount()"
@@ -483,13 +490,13 @@
                       />
                     </div>
                   </div>
-
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label
                         class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
                         >បរិមាណប្រើប្រាស់</label
-                      ><input
+                      >
+                      <input
                         type="number"
                         id="usage_details"
                         oninput="calculateAutoAmount()"
@@ -501,7 +508,8 @@
                       <label
                         class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex justify-between"
                         >តម្លៃឯកតា (Rate)</label
-                      ><input
+                      >
+                      <input
                         type="number"
                         step="0.01"
                         id="rate"
@@ -510,7 +518,6 @@
                       />
                     </div>
                   </div>
-
                   <div class="pt-2">
                     <label
                       class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex justify-between"
@@ -534,7 +541,6 @@
                       class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-3 outline-none font-bold text-xl cursor-not-allowed text-center"
                     />
                   </div>
-
                   <button
                     type="submit"
                     id="submitBtn"
@@ -839,12 +845,10 @@
                     >
                       ប្រវត្តិប្រើប្រាស់ ១២ខែចុងក្រោយ
                     </div>
-
                     <div
                       id="slip-history-grid"
-                      class="grid grid-cols-1 gap-y-1 text-gray-800 font-medium h-[150px] overflow-hidden font-mono text-[10px] w-full px-2"
+                      class="w-full text-gray-800 font-medium h-[150px] overflow-hidden font-mono text-[10px]"
                     ></div>
-
                     <div
                       class="flex justify-between border-t border-blue-300 mt-2 pt-2 font-bold text-black text-[11px]"
                     >
@@ -989,6 +993,7 @@
                       </tr>
                     </tbody>
                   </table>
+
                   <div
                     class="flex flex-col px-3 mt-4 font-bold text-[13px] text-black border-t-2 border-blue-500 pt-2 w-[90%] mx-auto bg-blue-50 rounded-lg p-2 shadow-sm"
                   >
@@ -1142,7 +1147,7 @@
                     >
                       <span class="text-blue-800 shrink-0">អតិថិជន</span
                       ><span
-                        class="text-black edc-font-moul text-[12px] text-blue-900 break-words text-right flex-1 ml-2 max-w-[150px] truncate"
+                        class="text-black edc-font-moul text-[12px] text-blue-900 break-words line-clamp-2 leading-tight text-right flex-1 ml-2 max-w-[150px]"
                         id="edc-name2"
                         >...</span
                       >
@@ -1291,7 +1296,6 @@
         </div>
       </div>
     </div>
-
     <div
       id="toast-container"
       class="fixed bottom-6 right-6 z-[70] flex flex-col gap-3 pointer-events-none"
@@ -1391,7 +1395,6 @@
             .toISOString()
             .split("T")[0];
         updateDueDateOneWeek();
-
         calculateAdvancedAmount();
 
         const activeTab =
@@ -1420,6 +1423,7 @@
       });
 
       function switchView(view) {
+        /* Unchanged */
         ["dashboard", "invoices", "bulk", "customers"].forEach((v) => {
           let el = document.getElementById(`view-${v}`);
           if (el) {
@@ -1451,6 +1455,7 @@
       }
 
       function logout() {
+        /* Unchanged */
         Swal.fire({
           title: "ចាកចេញពីប្រព័ន្ធ?",
           icon: "warning",
@@ -1472,6 +1477,7 @@
       }
 
       async function fetchData() {
+        /* Unchanged */
         try {
           const query =
             session.role === "company"
@@ -1488,6 +1494,7 @@
       }
 
       function processAllData() {
+        /* Unchanged */
         if (document.getElementById("existing-customers"))
           updateCustomerDatalist();
         if (document.getElementById("dash-total-bills")) renderDashboard();
@@ -1498,6 +1505,7 @@
       }
 
       function renderDashboard() {
+        /* Unchanged Dashboard Logics */
         const paid = allBillsData.filter((b) => b.status === "Paid");
         const unpaid = allBillsData.filter((b) => b.status === "Unpaid");
         const rev = paid.reduce(
@@ -1588,6 +1596,7 @@
       }
 
       function renderInvoices() {
+        /* Unchanged Logics */
         const searchEl = document.getElementById("searchInvoice");
         const term = (searchEl ? searchEl.value : "").toLowerCase();
         const filtered = [...allBillsData]
@@ -1650,12 +1659,10 @@
           const rate = Number(billInfo.rate) || Number(session.rate) || 0;
           const qty = Number(billInfo.usage_details) || 0;
 
-          // គណនាការប្រើប្រាស់ និង Fee ត្រលប់មកវិញពី Total
           const subtotal = qty * rate;
           let feeAmt = totalGrandUsd - subtotal;
           if (feeAmt < 0.01) feeAmt = 0;
 
-          // រកភាគរយ Fee ជាក់ស្តែង
           let actualFeePercent = session.fee_percent || 0;
           if (subtotal > 0 && feeAmt > 0) {
             actualFeePercent = parseFloat(
@@ -1721,7 +1728,6 @@
           setElsText("edc-old-read", oldRead.toString().padStart(7, "0"));
           setElsText("edc-new-read", newRead.toString().padStart(7, "0"));
 
-          // បង្ហាញទិន្នន័យជាក់ស្តែង (តម្លៃប្រើប្រាស់ និង Fee)
           setElsText("edc-qty", qty.toLocaleString());
           setElsText("edc-rate-table", `$${rate.toFixed(2)}`);
           setElsText("edc-subtotal", `$${subtotal.toFixed(2)}`);
@@ -1729,13 +1735,14 @@
           setElsText("edc-fee-amount", `$${feeAmt.toFixed(2)}`);
 
           const totalRiel = Math.round(totalGrandUsd * 4000).toLocaleString();
+          setElsText("edc-total-mid", `$${totalGrandUsd.toFixed(2)}`);
+          setElsText("edc-total1", `$${totalGrandUsd.toFixed(2)}`);
 
-          // រៀបចំលុយផ្តេក $ / ៛ (Inline)
-          const inlineMoneyFormat = `<div class="flex items-center gap-1.5 justify-end pr-1"><span class="text-[#004890] font-bold text-[16px] font-mono">$${totalGrandUsd.toFixed(2)}</span><span class="text-slate-500 text-[12px] font-bold">/ ${totalRiel} ៛</span></div>`;
-
-          setElsHtml("edc-total-mid", inlineMoneyFormat);
-          setElsHtml("edc-total1", inlineMoneyFormat);
-          setElsHtml("edc-total-main", inlineMoneyFormat);
+          // រៀបចំលុយផ្តេក $ / ៛
+          setElsHtml(
+            "edc-total-main",
+            `<div class="flex items-center gap-1.5 justify-end pr-1"><span class="text-[#004890] font-bold text-[16px] font-mono">$${totalGrandUsd.toFixed(2)}</span><span class="text-slate-500 text-[12px] font-bold">/ ${totalRiel} ៛</span></div>`,
+          );
           setElsHtml(
             "edc-total3",
             `<div class="flex items-center gap-1.5 justify-end pr-1"><span class="text-[#004890] font-bold text-[14px] font-mono">$${totalGrandUsd.toFixed(2)}</span><span class="text-slate-500 text-[11px] font-bold">/ ${totalRiel} ៛</span></div>`,
@@ -1747,44 +1754,47 @@
           );
           setElsText("edc-stamp-name", session.name || companyName);
 
-          // ប្រវត្តិប្រើប្រាស់ ១ជួរឈរ (រៀបពីចាស់មកថ្មី)
+          // ប្រវត្តិប្រើប្រាស់ជាជួរឈរចំនួន២ និងរៀបពីលើចុះក្រោម
           const historyGrid = document.getElementById("slip-history-grid");
           let customerBills = allBillsData.filter(
             (b) => b.consumer_no === consumerNo && b.month <= billInfo.month,
           );
-
-          // Sort Ascending (Oldest to Newest)
           customerBills.sort((a, b) =>
             (a.month || "").localeCompare(b.month || ""),
           );
 
-          let recent12 = customerBills.slice(-6); // យកតែ ៦ខែ ដើម្បីកុំអោយវែងពេក
-          const paddedBills = Array(6).fill(null);
-          const startIndex = 6 - recent12.length;
+          let recent12 = customerBills.slice(-12);
+          const paddedBills = Array(12).fill(null);
+          const startIndex = 12 - recent12.length;
           for (let i = 0; i < recent12.length; i++) {
             paddedBills[startIndex + i] = recent12[i];
           }
 
-          let historyHtml = "";
+          let col1Html = "";
+          let col2Html = "";
           let totalUsage = 0;
           let points = [];
 
-          paddedBills.forEach((b) => {
+          paddedBills.forEach((b, i) => {
+            let rowHtml = "";
             if (b) {
               const bUsage = Number(b.usage_details) || 0;
               totalUsage += bUsage;
               const [yyyy, mm] = (b.month || "").split("-");
               const shortYear = yyyy ? yyyy.substring(2) : "00";
-              historyHtml += `<div class="flex justify-between items-center w-[85%] mx-auto border-b border-blue-100 py-0.5"><span class="text-gray-500">20/${mm}/${shortYear}</span><span class="text-[#005bb5] font-bold">${bUsage.toLocaleString()}</span></div>`;
+              rowHtml = `<div class="flex justify-between w-full border-b border-gray-100 py-[2px]"><span class="text-gray-600">${mm}/${shortYear}</span><span class="text-[#005bb5] font-bold">${bUsage.toLocaleString()}</span></div>`;
               points.push(bUsage);
             } else {
-              historyHtml += `<div class="flex justify-between items-center w-[85%] mx-auto border-b border-blue-100 py-0.5"><span class="text-gray-400">--/--/--</span><span class="text-gray-400">0</span></div>`;
+              rowHtml = `<div class="flex justify-between w-full border-b border-gray-100 py-[2px] text-gray-400"><span>--/--</span><span>0</span></div>`;
               points.push(0);
             }
+            if (i < 6) col1Html += rowHtml;
+            else col2Html += rowHtml;
           });
 
-          if (historyGrid)
-            historyGrid.innerHTML = `<div class="flex flex-col w-full">${historyHtml}</div>`;
+          if (historyGrid) {
+            historyGrid.innerHTML = `<div class="flex w-full"><div class="w-1/2 flex flex-col pr-1">${col1Html}</div><div class="w-1/2 flex flex-col pl-1 border-l border-blue-200">${col2Html}</div></div>`;
+          }
 
           const avgUsage =
             recent12.length > 0
@@ -1795,7 +1805,7 @@
           const maxPoint = Math.max(...points) || 1;
           let polylinePoints = points
             .map((p, i) => {
-              const x = (i / 5) * 100;
+              const x = (i / 11) * 100;
               const y = 35 - (p / maxPoint) * 25;
               return `${x},${y}`;
             })
@@ -1805,7 +1815,7 @@
           if (svgChart) {
             let svgHtml = `<polyline points="${polylinePoints}" fill="none" stroke="#004890" stroke-width="1.5"/>`;
             points.forEach((p, i) => {
-              const x = (i / 5) * 100;
+              const x = (i / 11) * 100;
               const y = 35 - (p / maxPoint) * 25;
               svgHtml += `<circle cx="${x}" cy="${y}" r="2" fill="#004890"/>`;
             });
@@ -1935,7 +1945,7 @@
             if (res.ok) {
               showToast("កែប្រែជោគជ័យ!", "success");
               closeModal("edit-form-modal");
-              billsHash = ""; // បង្ខំអោយទាញ Data ថ្មី
+              billsHash = "";
               fetchData();
             } else {
               showToast("បរាជ័យក្នុងការកែប្រែ", "error");
@@ -1987,7 +1997,6 @@
           Number(document.getElementById("old_reading").value) || 0;
         const newRead =
           Number(document.getElementById("new_reading").value) || 0;
-
         let qty = 0;
         if (newRead > 0 && newRead >= oldRead) {
           qty = newRead - oldRead;
@@ -1995,7 +2004,6 @@
         } else {
           qty = Number(document.getElementById("usage_details").value) || 0;
         }
-
         const subtotal = qty * rate;
         const fee = subtotal * (feePercent / 100);
         document.getElementById("total_amount_usd").value = (
@@ -2007,7 +2015,6 @@
         const rate = Number(session.rate) || 0;
         const feePercent = Number(session.fee_percent) || 0;
         const qty = Number(document.getElementById("usage_details").value) || 0;
-
         const subtotal = qty * rate;
         const fee = subtotal * (feePercent / 100);
         document.getElementById("total_amount_usd").value = (
@@ -2016,6 +2023,7 @@
       }
 
       function handleConsumerNoInput() {
+        /* Unchanged */
         const consumerNo = document.getElementById("consumer_no").value.trim();
         const customerBills = allBillsData.filter(
           (b) => b.consumer_no === consumerNo,
@@ -2069,7 +2077,6 @@
             cNo = "CUS" + Math.floor(10000000 + Math.random() * 90000000);
             isNew = true;
           }
-
           if (isNew) {
             const existName = allBillsData.some(
               (b) => safeStr(b.customer_name) === safeStr(reqName),
@@ -2085,7 +2092,6 @@
               return;
             }
           }
-
           const monthDuplicate = allBillsData.some(
             (b) => b.consumer_no === cNo && b.month === reqMonth,
           );
@@ -2136,15 +2142,13 @@
               } else {
                 showToast("ជោគជ័យ!", "success");
               }
-              billsHash = ""; // Force reload
+              billsHash = "";
               fetchData();
               document.getElementById("billForm").reset();
               document.getElementById("company").value = session.company;
-
               document.getElementById("rate").value = session.rate || 0;
               document.getElementById("fee-hint").textContent =
                 `សេវាកាត់: ${session.fee_percent || 0}%`;
-
               document.getElementById("issue_date").value = new Date()
                 .toISOString()
                 .split("T")[0];
@@ -2159,7 +2163,6 @@
           }
         });
 
-      // Bulk Entry
       function updateAllBulkMonths() {
         const m = document.getElementById("bulk-global-month").value;
         document
@@ -2175,16 +2178,15 @@
           Number(document.getElementById(`bulk-new-${id}`).value) || 0;
         let qty = newM - oldM;
         if (qty < 0) qty = 0;
-
         const subtotal = qty * rate;
         const fee = subtotal * (feePercent / 100);
-
         document.getElementById(`bulk-qty-${id}`).value = qty;
         document.getElementById(`bulk-total-${id}`).value = (
           subtotal + fee
         ).toFixed(2);
       }
       async function submitBulkRow(cNo, cName) {
+        /* Unchanged */
         const m = document.getElementById(`bulk-month-${cNo}`).value;
         const t = Number(document.getElementById(`bulk-total-${cNo}`).value);
         const u = document.getElementById(`bulk-qty-${cNo}`).value;
@@ -2239,6 +2241,7 @@
       }
 
       async function autoGenerateFixedBills() {
+        /* Unchanged */
         const unique = {};
         allBillsData.forEach((b) => {
           if (b.consumer_no && !unique[b.consumer_no])
@@ -2313,6 +2316,7 @@
       }
 
       function renderBulkTable() {
+        /* Unchanged */
         const unique = {};
         allBillsData.forEach((b) => {
           if (b.consumer_no && !unique[b.consumer_no])
@@ -2324,7 +2328,6 @@
         const isMeter = session.type === "meter";
         const rate = Number(session.rate) || 0;
         const feePercent = Number(session.fee_percent) || 0;
-
         const defaultSubtotal = 1 * rate;
         const defaultTotal =
           defaultSubtotal + defaultSubtotal * (feePercent / 100);
@@ -2359,6 +2362,7 @@
       }
 
       function renderCustomers() {
+        /* Unchanged */
         const statusFilter = document.getElementById("filter-status").value;
         const cMap = {};
         allBillsData.forEach((b) => {
