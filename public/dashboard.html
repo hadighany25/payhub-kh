@@ -236,16 +236,6 @@
             ដំណើរការទិន្នន័យថ្ងៃនេះ
           </p>
         </div>
-        <div class="flex items-center gap-4">
-          <button
-            class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 relative transition"
-          >
-            <i data-lucide="bell" class="w-5 h-5"></i
-            ><span
-              class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"
-            ></span>
-          </button>
-        </div>
       </header>
 
       <div class="flex-1 overflow-y-auto p-8 relative">
@@ -390,12 +380,13 @@
                   <div>
                     <label
                       class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex justify-between"
-                      ><span>លេខកូដអតិថិជន</span
+                    >
+                      <span>លេខកូដអតិថិជន</span
                       ><span
                         class="text-indigo-400 font-normal lowercase text-[10px]"
                         >(ទុកទទេដើម្បីបង្កើតថ្មី)</span
-                      ></label
-                    >
+                      >
+                    </label>
                     <div class="flex gap-2">
                       <input
                         type="text"
@@ -404,7 +395,8 @@
                         oninput="handleConsumerNoInput()"
                         placeholder="វាយស្វែងរក ឬ ទុកទទេ..."
                         class="w-full bg-white border border-slate-300 text-slate-900 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      /><button
+                      />
+                      <button
                         type="button"
                         onclick="generateAutoConsumerNo()"
                         class="bg-indigo-50 text-indigo-600 px-3 py-2 rounded-lg hover:bg-indigo-100 transition-colors border border-indigo-100"
@@ -491,6 +483,7 @@
                       />
                     </div>
                   </div>
+
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label
@@ -507,11 +500,7 @@
                     <div>
                       <label
                         class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex justify-between"
-                        >តម្លៃឯកតា
-                        <span
-                          id="rate-hint"
-                          class="text-indigo-500"
-                        ></span></label
+                        >តម្លៃឯកតា (Rate)</label
                       ><input
                         type="number"
                         step="0.01"
@@ -521,12 +510,22 @@
                       />
                     </div>
                   </div>
+
                   <div class="pt-2">
                     <label
-                      class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5"
-                      >សរុបប្រាក់ (USD)
-                      <span class="text-rose-500">*</span></label
-                    ><input
+                      class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex justify-between"
+                    >
+                      <span
+                        >សរុបប្រាក់ (USD)
+                        <span class="text-rose-500">*</span></span
+                      >
+                      <span
+                        class="text-[10px] text-amber-600 font-bold"
+                        id="fee-hint"
+                        >សេវាកាត់: 0%</span
+                      >
+                    </label>
+                    <input
                       type="number"
                       step="0.01"
                       id="total_amount_usd"
@@ -535,6 +534,7 @@
                       class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-3 outline-none font-bold text-xl cursor-not-allowed text-center"
                     />
                   </div>
+
                   <button
                     type="submit"
                     id="submitBtn"
@@ -558,8 +558,8 @@
                   <i
                     data-lucide="search"
                     class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  ></i
-                  ><input
+                  ></i>
+                  <input
                     type="text"
                     id="searchInvoice"
                     onkeyup="renderInvoices()"
@@ -584,7 +584,9 @@
                       <th class="px-5 py-3 font-semibold">លេខរៀង (Bill ID)</th>
                       <th class="px-5 py-3 font-semibold">អតិថិជន</th>
                       <th class="px-5 py-3 font-semibold">ខែ</th>
-                      <th class="px-5 py-3 font-semibold">ទឹកប្រាក់</th>
+                      <th class="px-5 py-3 font-semibold">
+                        ទឹកប្រាក់ (រួម Fee)
+                      </th>
                       <th class="px-5 py-3 font-semibold">ស្ថានភាព</th>
                       <th class="px-5 py-3 font-semibold text-right">
                         សកម្មភាព
@@ -626,7 +628,8 @@
                   id="bulk-global-month"
                   onchange="updateAllBulkMonths()"
                   class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                /><button
+                />
+                <button
                   id="btn-auto-generate"
                   onclick="autoGenerateFixedBills()"
                   class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2"
@@ -773,9 +776,9 @@
               </div>
               <div
                 class="text-center text-[10px] mb-3 text-black font-semibold"
+                id="slip-company-contact"
               >
-                សាខាមុខសែនត្បូង សង្កាត់ទឹកល្អក់ទី ៣ ខណ្ឌទួលគោក រាជធានីភ្នំពេញ
-                <br />Hotline Tel: 068 333 266 / 061 333 266 / 086 333 266
+                អាសយដ្ឋានក្រុមហ៊ុន ឬ Hotline: 012 345 678
               </div>
               <div class="flex gap-3 mb-3">
                 <div
@@ -809,7 +812,7 @@
                     ...
                   </div>
                   <div class="text-blue-600 font-semibold">
-                    លេខសម្គាល់អតិថិជន <span class="text-[9px]">ID</span>
+                    លេខសម្គាល់ <span class="text-[9px]">ID</span>
                   </div>
                   <div
                     class="text-black text-right font-bold text-[13px] text-blue-800 font-mono truncate"
@@ -817,15 +820,12 @@
                   >
                     ...
                   </div>
-                  <div class="text-blue-600 font-semibold">
-                    ទីតាំង <span class="text-[9px]">LOCATION</span>
-                  </div>
-                  <div class="text-black text-right truncate">492-6005 RD</div>
                   <div class="text-blue-600 font-semibold">ប្រភេទអតិថិជន</div>
                   <div
                     class="text-black text-right text-[9px] uppercase leading-tight font-medium truncate"
+                    id="edc-category"
                   >
-                    3Phx100A RIEL
+                    General
                   </div>
                 </div>
               </div>
@@ -848,7 +848,7 @@
                     >
                       <span class="text-blue-800">ប្រើប្រាស់ជាមធ្យមខែនេះ</span
                       ><span id="slip-avg-usage" class="text-blue-600 font-mono"
-                        >0kWh</span
+                        >0</span
                       >
                     </div>
                     <div
@@ -859,26 +859,17 @@
                         viewBox="0 0 100 40"
                         preserveAspectRatio="none"
                         id="history-chart-svg"
-                      >
-                        <polyline
-                          points="0,30 10,25 20,20 30,10 40,25 50,15 60,15 70,25 80,10 90,20 100,25"
-                          fill="none"
-                          stroke="#004890"
-                          stroke-width="1"
-                        />
-                      </svg>
+                      ></svg>
                     </div>
                   </div>
                   <div
                     class="border border-blue-500 text-[10px] p-2 text-gray-800 bg-blue-50/30 flex-1 leading-relaxed rounded-sm overflow-hidden"
                   >
                     <span class="font-bold text-rose-600">* ចំណាំ៖</span>
-                    ក្នុងករណីអតិថិជនមិនបានបង់ប្រាក់តាមការកំណត់
-                    ក្រុមហ៊ុននឹងផ្អាកការផ្គត់ផ្គង់ថាមពលជាបណ្តោះអាសន្ន។
-                    ការភ្ជាប់ចរន្តប្រើវិញលុះត្រាតែបានបង់បំណុលសរុប។<br />
+                    សូមបង់ប្រាក់ឱ្យបានទាន់ពេលវេលាដើម្បីបញ្ចៀសការកាត់ផ្តាច់សេវាកម្ម។<br />
                     <span class="font-bold text-blue-600 mt-1 block"
-                      >អតិថិជនអាចបង់ប្រាក់ដោយផ្ទាល់តាមរយៈកម្មវិធីធនាគារ U-PAY
-                      Mobile App បានយ៉ាងងាយស្រួល។</span
+                      >លោកអ្នកអាចបង់ប្រាក់តាមរយៈ U-PAY Mobile App ដោយស្កេន QR
+                      Code!</span
                     >
                   </div>
                 </div>
@@ -934,9 +925,9 @@
                           បរិមាណ
                         </th>
                         <th class="p-1.5 border-r border-blue-200 font-bold">
-                          តម្លៃ
+                          តម្លៃឯកតា
                         </th>
-                        <th class="p-1.5 font-bold">តម្លៃសរុប</th>
+                        <th class="p-1.5 font-bold">តម្លៃប្រើប្រាស់</th>
                       </tr>
                     </thead>
                     <tbody class="text-gray-800 font-mono">
@@ -977,13 +968,30 @@
                           ...
                         </td>
                       </tr>
+                      <tr
+                        class="border-b border-gray-100 hover:bg-gray-50 bg-blue-50/20"
+                      >
+                        <td
+                          colspan="5"
+                          class="p-2 border-r border-gray-200 text-right font-semibold text-blue-800 text-[11px]"
+                        >
+                          ថ្លៃសេវាបន្ថែម (Fee
+                          <span id="edc-fee-percent">0</span>%)
+                        </td>
+                        <td
+                          class="p-2 text-right pr-3 font-bold text-rose-600 text-[12px]"
+                          id="edc-fee-amount"
+                        >
+                          ...
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                   <div
                     class="flex justify-between px-3 mt-4 font-bold text-[13px] text-black border-t-2 border-blue-500 pt-2 w-[90%] mx-auto bg-blue-50 rounded-lg p-2 shadow-sm"
                   >
                     <span class="edc-font-moul tracking-widest text-[#004890]"
-                      >សរុប</span
+                      >សរុបរួម</span
                     ><span
                       id="edc-total-mid"
                       class="text-[14px] font-mono text-right"
@@ -1021,7 +1029,8 @@
                     </div>
                     <span
                       class="edc-font-moul text-[19px] text-blue-800 z-10 bg-white/70 px-3 rounded shadow-sm relative mt-2"
-                      >ទរនី អាល់ហាទី</span
+                      id="edc-stamp-name"
+                      >ឈ្មោះក្រុមហ៊ុន</span
                     >
                     <span
                       class="font-bold text-[13px] tracking-widest mt-1 mb-1 text-blue-900 z-10 bg-white/70 px-2 rounded font-mono"
@@ -1104,7 +1113,6 @@
                   ><i data-lucide="scissors" class="w-3 h-3"></i> កាត់ត្រង់នេះ
                   (Tear Here)</span
                 >
-
                 <div
                   class="border-2 border-blue-500 flex text-[12px] bg-white rounded-lg overflow-hidden shadow-sm"
                 >
@@ -1221,7 +1229,8 @@
                   class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
                   id="edit-label-1"
                   >ឈ្មោះអតិថិជន</label
-                ><input
+                >
+                <input
                   type="text"
                   id="edit_field_1"
                   required
@@ -1235,7 +1244,8 @@
                   <label
                     class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
                     >សម្រាប់ខែ</label
-                  ><input
+                  >
+                  <input
                     type="month"
                     id="edit_field_2"
                     class="w-full bg-white border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-amber-500"
@@ -1245,7 +1255,8 @@
                   <label
                     class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
                     >បរិមាណប្រើប្រាស់</label
-                  ><input
+                  >
+                  <input
                     type="number"
                     id="edit_field_3"
                     oninput="calcEditBillAmount()"
@@ -1257,7 +1268,8 @@
                 <label
                   class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
                   >សរុបប្រាក់ (USD) លោតអូតូ</label
-                ><input
+                >
+                <input
                   type="number"
                   step="0.01"
                   id="edit_field_4"
@@ -1277,6 +1289,7 @@
         </div>
       </div>
     </div>
+
     <div
       id="toast-container"
       class="fixed bottom-6 right-6 z-[70] flex flex-col gap-3 pointer-events-none"
@@ -1284,18 +1297,21 @@
 
     <script>
       let allBillsData = [];
+      let billsHash = "";
       let revenueChartInstance = null;
       let statusChartInstance = null;
-      const API_URL = window.location.protocol.includes("http")
-        ? "/api/bills"
-        : "http://localhost:4000/api/bills";
+
+      const API_URL =
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname === "localhost"
+          ? "http://localhost:4000/api"
+          : "/api";
 
       const safeStr = (val) => (val || "").toString().toLowerCase();
       function escapeHtml(str) {
         return (str || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
       }
 
-      // 1. ស្វ័យប្រវត្តិកំណត់ថ្ងៃផុតកំណត់ ១អាទិត្យក្រោយថ្ងៃចេញ
       function updateDueDateOneWeek() {
         const issueDateVal = document.getElementById("issue_date").value;
         if (issueDateVal) {
@@ -1333,6 +1349,11 @@
             day: "numeric",
           });
 
+        const rate = Number(session.rate) || 0;
+        const fee = Number(session.fee_percent) || 0;
+        document.getElementById("rate").value = rate;
+        document.getElementById("fee-hint").textContent = `សេវាកាត់: ${fee}%`;
+
         const today = new Date();
         if (document.getElementById("issue_date"))
           document.getElementById("issue_date").value = today
@@ -1341,21 +1362,24 @@
         updateDueDateOneWeek();
 
         calculateAdvancedAmount();
+
+        const activeTab =
+          localStorage.getItem("dashboard_active_tab") || "dashboard";
+        switchView(activeTab);
         fetchData();
 
-        const lastTab =
-          localStorage.getItem("payhub_current_tab") || "dashboard";
-        switchView(lastTab);
-
-        // Auto Silent Refresh every 4 seconds
         setInterval(async () => {
           try {
-            const res = await fetch(
-              `${API_URL}?company=${encodeURIComponent(session.company)}`,
-            );
+            const query =
+              session.role === "company"
+                ? `?company=${encodeURIComponent(session.company)}`
+                : "";
+            const res = await fetch(`${API_URL}/bills${query}`);
             if (res.ok) {
               const newData = await res.json();
-              if (JSON.stringify(allBillsData) !== JSON.stringify(newData)) {
+              const newHash = JSON.stringify(newData);
+              if (billsHash !== newHash) {
+                billsHash = newHash;
                 allBillsData = newData;
                 processAllData();
               }
@@ -1375,6 +1399,7 @@
             .getElementById(`nav-${v}`)
             .classList.replace("nav-active", "nav-inactive");
         });
+
         let target = document.getElementById(`view-${view}`);
         if (target) {
           target.classList.remove("hidden");
@@ -1392,7 +1417,7 @@
           customers: "អតិថិជន (Customers)",
         };
         document.getElementById("page-title").textContent = viewTitles[view];
-        localStorage.setItem("payhub_current_tab", view);
+        localStorage.setItem("dashboard_active_tab", view);
       }
 
       function logout() {
@@ -1418,37 +1443,29 @@
 
       async function fetchData() {
         try {
-          const res = await fetch(
-            `${API_URL}?company=${encodeURIComponent(session.company)}`,
-          );
+          const query =
+            session.role === "company"
+              ? `?company=${encodeURIComponent(session.company)}`
+              : "";
+          const res = await fetch(`${API_URL}/bills${query}`);
           if (!res.ok) throw new Error("Network Error");
+
           allBillsData = await res.json();
+          billsHash = JSON.stringify(allBillsData);
           processAllData();
         } catch (error) {
           console.warn("Fetch Error", error);
-          processAllData();
         }
       }
 
       function processAllData() {
-        try {
+        if (document.getElementById("existing-customers"))
           updateCustomerDatalist();
-        } catch (e) {}
-        try {
-          renderDashboard();
-        } catch (e) {}
-        try {
-          renderInvoices();
-        } catch (e) {}
-        try {
-          renderBulkTable();
-        } catch (e) {}
-        try {
-          renderCustomers();
-        } catch (e) {}
-        try {
-          lucide.createIcons();
-        } catch (e) {}
+        if (document.getElementById("dash-total-bills")) renderDashboard();
+        if (document.getElementById("invoices-table")) renderInvoices();
+        if (document.getElementById("bulk-table-body")) renderBulkTable();
+        if (document.getElementById("customers-table")) renderCustomers();
+        lucide.createIcons();
       }
 
       function renderDashboard() {
@@ -1580,151 +1597,207 @@
           `<tr><td colspan="6" class="text-center py-12 text-slate-400">មិនមានទិន្នន័យ</td></tr>`;
       }
 
+      // ប្រព័ន្ធការពារការគាំង (Anti-Crash DOM Setter)
+      const setElsText = (id, txt) => {
+        document
+          .querySelectorAll(`#${id}`)
+          .forEach((el) => (el.textContent = txt));
+      };
+      const setElsHtml = (id, html) => {
+        document
+          .querySelectorAll(`#${id}`)
+          .forEach((el) => (el.innerHTML = html));
+      };
+      const setElsSrc = (id, src) => {
+        document.querySelectorAll(`#${id}`).forEach((el) => (el.src = src));
+      };
+
       function showSlip(billId) {
-        const billInfo = allBillsData.find((b) => b.bill_id === billId);
-        if (!billInfo) return showToast("រកមិនឃើញវិក្កយបត្រនេះទេ", "error");
+        try {
+          const billInfo = allBillsData.find((b) => b.bill_id === billId);
+          if (!billInfo) return showToast("រកមិនឃើញវិក្កយបត្រនេះទេ", "error");
 
-        const companyName = session.company || "PAYHUB KH";
-        const consumerNo = billInfo.consumer_no;
-        const amount = Number(billInfo.total_amount_usd) || 0;
-        const rate = Number(billInfo.rate || session.rate) || 0;
-        const qty = Number(billInfo.usage_details) || 0;
+          const companyName = session.company || "PAYHUB KH";
+          const consumerNo = billInfo.consumer_no || "N/A";
+          const totalGrandUsd = Number(billInfo.total_amount_usd) || 0;
+          const rate = Number(billInfo.rate) || Number(session.rate) || 0;
+          const qty = Number(billInfo.usage_details) || 0;
 
-        document.getElementById("slip-dynamic-company-kh").textContent =
-          companyName;
-        document.getElementById("slip-dynamic-company-en").textContent =
-          companyName.toUpperCase();
-        document.getElementById("slip-dynamic-logo-letter").textContent =
-          companyName.charAt(0).toUpperCase();
-        document.getElementById("stamp-circular-company").textContent =
-          companyName.toUpperCase() + " SERVICE";
+          // គណនាការប្រើប្រាស់ និង Fee ត្រលប់មកវិញពី Total
+          const subtotal = qty * rate;
+          let feeAmt = totalGrandUsd - subtotal;
+          if (feeAmt < 0) feeAmt = 0;
 
-        // Invoice number should be fully visible over the barcode
-        document.getElementById("edc-inv").textContent = billId.replace(
-          "INV-",
-          "",
-        );
-
-        document.getElementById("edc-name").textContent =
-          billInfo.customer_name;
-        document.getElementById("edc-name2").textContent =
-          billInfo.customer_name;
-        document.getElementById("edc-cid").textContent = consumerNo;
-        document.getElementById("edc-cid2").textContent = consumerNo;
-        document.getElementById("edc-month").textContent = billInfo.month;
-
-        const issueDateObj = billInfo.issue_date
-          ? new Date(billInfo.issue_date)
-          : new Date();
-        const dateStr = issueDateObj.toLocaleDateString("en-GB");
-        document.getElementById("edc-date").textContent = dateStr;
-        document.getElementById("edc-date2").textContent = dateStr;
-
-        const dueDateObj = billInfo.due_date
-          ? new Date(billInfo.due_date)
-          : new Date(
-              new Date(issueDateObj).setDate(issueDateObj.getDate() + 7),
+          // រកភាគរយ Fee ជាក់ស្តែង
+          let actualFeePercent = session.fee_percent || 0;
+          if (subtotal > 0 && feeAmt > 0) {
+            actualFeePercent = parseFloat(
+              ((feeAmt / subtotal) * 100).toFixed(1),
             );
-        const dueDateStr = dueDateObj.toLocaleDateString("en-GB");
-        document.getElementById("edc-due1").textContent = dueDateStr;
-        document.getElementById("edc-due2").textContent = dueDateStr;
-        document.getElementById("id-due-bot-label").textContent = dueDateStr;
-
-        document.getElementById("edc-stamp-date").textContent = issueDateObj
-          .toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })
-          .toUpperCase();
-
-        const oldRead = Number(billInfo.old_reading) || 0;
-        const newRead = Number(billInfo.new_reading) || oldRead + qty;
-        document.getElementById("edc-old-read").textContent = oldRead
-          .toString()
-          .padStart(7, "0");
-        document.getElementById("edc-new-read").textContent = newRead
-          .toString()
-          .padStart(7, "0");
-        document.getElementById("edc-qty").textContent = qty.toLocaleString();
-        document.getElementById("edc-rate-table").textContent = `${rate}`;
-
-        const totalRiel = Math.round(amount * 4000).toLocaleString();
-        document.getElementById("edc-subtotal").textContent = `${totalRiel} ៛`;
-        document.getElementById("edc-total-mid").textContent = `${totalRiel} ៛`;
-        document.getElementById("edc-total1").textContent = `${totalRiel} ៛`;
-
-        // ដាក់ទាំងដុល្លារ ទាំងរៀល ផ្តេកគ្នា
-        document.getElementById("edc-total-main").innerHTML =
-          `<span class="text-[#004890] mr-1">$${amount.toFixed(2)}</span> / <span class="ml-1">${totalRiel} ៛</span>`;
-        document.getElementById("edc-total3").innerHTML =
-          `<span class="text-[#004890] text-[15px] font-bold block">$${amount.toFixed(2)}</span><span class="text-[12px] block text-slate-500">${totalRiel} ៛</span>`;
-
-        // 🔥 ប្រវត្តិប្រើប្រាស់ ១២ខែចុងក្រោយ (រៀបតាមខែ)
-        const historyGrid = document.getElementById("slip-history-grid");
-        let customerBills = allBillsData
-          .filter(
-            (b) => b.consumer_no === consumerNo && b.month <= billInfo.month,
-          )
-          .sort((a, b) => (b.month || "").localeCompare(a.month || "")); // តម្រៀបពីថ្មីទៅចាស់
-
-        let historyHtml = "";
-        let totalUsage = 0;
-        let count = 0;
-        let points = [];
-
-        for (let i = 0; i < 12; i++) {
-          if (i < customerBills.length) {
-            const b = customerBills[i];
-            const bUsage = Number(b.usage_details) || 0;
-            totalUsage += bUsage;
-            count++;
-            const [yyyy, mm] = (b.month || "").split("-");
-            const shortYear = yyyy ? yyyy.substring(2) : "00";
-            historyHtml += `<div>20/${mm}/${shortYear}</div><div class="text-right text-[#005bb5] font-bold">${bUsage.toLocaleString()}</div>`;
-            points.push(bUsage);
-          } else {
-            historyHtml += `<div class="text-gray-400">--/--/--</div><div class="text-right text-gray-400">0</div>`;
-            points.push(0);
           }
-        }
-        historyGrid.innerHTML = historyHtml;
-        const avgUsage =
-          count > 0 ? (totalUsage / count).toFixed(2) : qty.toFixed(2);
-        document.getElementById("slip-avg-usage").textContent =
-          `${avgUsage}kWh`;
 
-        points.reverse();
-        const maxPoint = Math.max(...points) || 1;
-        let polylinePoints = points
-          .map((p, i) => {
-            const x = (i / 11) * 100;
-            const y = 35 - (p / maxPoint) * 25;
-            return `${x},${y}`;
-          })
-          .join(" ");
+          setElsText("slip-dynamic-company-kh", companyName);
+          setElsText("slip-dynamic-company-en", companyName.toUpperCase());
+          setElsText(
+            "slip-dynamic-logo-letter",
+            companyName.charAt(0).toUpperCase(),
+          );
+          setElsText(
+            "stamp-circular-company",
+            companyName.toUpperCase() + " SERVICE",
+          );
 
-        const svgChart = document.getElementById("history-chart-svg");
-        if (svgChart) {
-          let svgHtml = `<polyline points="${polylinePoints}" fill="none" stroke="#004890" stroke-width="1.5"/>`;
-          points.forEach((p, i) => {
-            const x = (i / 11) * 100;
-            const y = 35 - (p / maxPoint) * 25;
-            svgHtml += `<circle cx="${x}" cy="${y}" r="2" fill="#004890"/>`;
+          setElsText("edc-inv", billId.replace("INV-", ""));
+          setElsText("edc-name", billInfo.customer_name || "N/A");
+          setElsText("edc-name2", billInfo.customer_name || "N/A");
+          setElsText("edc-cid", consumerNo);
+          setElsText("edc-cid2", consumerNo);
+          setElsText("edc-month", billInfo.month || "");
+          setElsText("edc-category", session.category || "General");
+
+          const issueDateObj = billInfo.issue_date
+            ? new Date(billInfo.issue_date)
+            : new Date();
+          const dateStr = issueDateObj.toLocaleDateString("en-GB");
+          setElsText("edc-date", dateStr);
+          setElsText("edc-date2", dateStr);
+
+          const dueDateObj = billInfo.due_date
+            ? new Date(billInfo.due_date)
+            : new Date(
+                new Date(issueDateObj).setDate(issueDateObj.getDate() + 7),
+              );
+          const dueDateStr = dueDateObj.toLocaleDateString("en-GB");
+          setElsText("edc-due1", dueDateStr);
+          setElsText("id-due-bot-label", dueDateStr);
+
+          setElsText(
+            "edc-stamp-date",
+            issueDateObj
+              .toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+              .toUpperCase(),
+          );
+
+          const oldRead = Number(billInfo.old_reading) || 0;
+          const newRead = Number(billInfo.new_reading) || oldRead + qty;
+          setElsText("edc-old-read", oldRead.toString().padStart(7, "0"));
+          setElsText("edc-new-read", newRead.toString().padStart(7, "0"));
+
+          // បង្ហាញទិន្នន័យជាក់ស្តែង (តម្លៃប្រើប្រាស់ និង Fee)
+          setElsText("edc-qty", qty.toLocaleString());
+          setElsText("edc-rate-table", `$${rate.toFixed(2)}`);
+          setElsText("edc-subtotal", `$${subtotal.toFixed(2)}`);
+          setElsText("edc-fee-percent", actualFeePercent);
+          setElsText("edc-fee-amount", `$${feeAmt.toFixed(2)}`);
+
+          const totalRiel = Math.round(totalGrandUsd * 4000).toLocaleString();
+          setElsText("edc-total-mid", `$${totalGrandUsd.toFixed(2)}`);
+          setElsText("edc-total1", `$${totalGrandUsd.toFixed(2)}`);
+
+          setElsHtml(
+            "edc-total-main",
+            `<span class="text-[#004890] mr-1">$${totalGrandUsd.toFixed(2)}</span> / <span class="ml-1">${totalRiel} ៛</span>`,
+          );
+          setElsHtml(
+            "edc-total3",
+            `<span class="text-[#004890] text-[15px] font-bold block">$${totalGrandUsd.toFixed(2)}</span><span class="text-[12px] block text-slate-500">${totalRiel} ៛</span>`,
+          );
+
+          // បញ្ចូលលេខទូរស័ព្ទ និង ឈ្មោះត្រា
+          setElsHtml(
+            "slip-company-contact",
+            `សាខាកណ្តាល រាជធានីភ្នំពេញ <br/> Hotline Tel: ${session.phone || "012 345 678"}`,
+          );
+          setElsText("edc-stamp-name", session.name || companyName);
+
+          // ប្រវត្តិប្រើប្រាស់ (រៀបតាមខែ ពីចាស់ទៅថ្មី)
+          const historyGrid = document.getElementById("slip-history-grid");
+          let customerBills = allBillsData.filter(
+            (b) => b.consumer_no === consumerNo && b.month <= billInfo.month,
+          );
+
+          // Sort Ascending (Oldest to Newest)
+          customerBills.sort((a, b) =>
+            (a.month || "").localeCompare(b.month || ""),
+          );
+
+          let recent12 = customerBills.slice(-12);
+          const paddedBills = Array(12).fill(null);
+          const startIndex = 12 - recent12.length;
+          for (let i = 0; i < recent12.length; i++) {
+            paddedBills[startIndex + i] = recent12[i];
+          }
+
+          let historyHtml = "";
+          let totalUsage = 0;
+          let points = [];
+
+          paddedBills.forEach((b) => {
+            if (b) {
+              const bUsage = Number(b.usage_details) || 0;
+              totalUsage += bUsage;
+              const [yyyy, mm] = (b.month || "").split("-");
+              const shortYear = yyyy ? yyyy.substring(2) : "00";
+              historyHtml += `<div>20/${mm}/${shortYear}</div><div class="text-right text-[#005bb5] font-bold">${bUsage.toLocaleString()}</div>`;
+              points.push(bUsage);
+            } else {
+              historyHtml += `<div class="text-gray-400">--/--/--</div><div class="text-right text-gray-400">0</div>`;
+              points.push(0);
+            }
           });
-          svgChart.innerHTML = svgHtml;
+
+          if (historyGrid) historyGrid.innerHTML = historyHtml;
+          const avgUsage =
+            recent12.length > 0
+              ? (totalUsage / recent12.length).toFixed(2)
+              : qty.toFixed(2);
+          setElsText("slip-avg-usage", avgUsage);
+
+          // គូរក្រាហ្វិកពីឆ្វេង(ចាស់) ទៅស្តាំ(ថ្មី)
+          const maxPoint = Math.max(...points) || 1;
+          let polylinePoints = points
+            .map((p, i) => {
+              const x = (i / 11) * 100;
+              const y = 35 - (p / maxPoint) * 25;
+              return `${x},${y}`;
+            })
+            .join(" ");
+
+          const svgChart = document.getElementById("history-chart-svg");
+          if (svgChart) {
+            let svgHtml = `<polyline points="${polylinePoints}" fill="none" stroke="#004890" stroke-width="1.5"/>`;
+            points.forEach((p, i) => {
+              const x = (i / 11) * 100;
+              const y = 35 - (p / maxPoint) * 25;
+              svgHtml += `<circle cx="${x}" cy="${y}" r="2" fill="#004890"/>`;
+            });
+            svgChart.innerHTML = svgHtml;
+          }
+
+          const qrData = encodeURIComponent(
+            `UPAY|${companyName}|${billId}|${totalGrandUsd}`,
+          );
+          setElsSrc(
+            "edc-qr",
+            `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`,
+          );
+          const bcUrl = `https://barcode.tec-it.com/barcode.ashx?data=${billId}&code=Code128&translate-esc=on`;
+          setElsSrc("edc-bc-top", bcUrl);
+          setElsSrc("edc-bc-bot", bcUrl);
+
+          document.getElementById("slip-modal").classList.remove("hidden");
+        } catch (error) {
+          console.error("កំហុសក្នុងការបើកវិក្កយបត្រ៖", error);
+          Swal.fire(
+            "កំហុសបច្ចេកទេស (Error)",
+            "មានបញ្ហាក្នុងការបើកវិក្កយបត្រ សូមសាកល្បងចុច (Ctrl + F5)",
+            "error",
+          );
         }
-
-        const qrData = encodeURIComponent(
-          `UPAY|${companyName}|${billId}|${amount}`,
-        );
-        document.getElementById("edc-qr").src =
-          `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`;
-        const bcUrl = `https://barcode.tec-it.com/barcode.ashx?data=${billId}&code=Code128&translate-esc=on`;
-        document.getElementById("edc-bc-top").src = bcUrl;
-        document.getElementById("edc-bc-bot").src = bcUrl;
-
-        document.getElementById("slip-modal").classList.remove("hidden");
       }
 
       function openEditModal(type, id, extraName = "") {
@@ -1762,8 +1835,14 @@
 
       function calcEditBillAmount() {
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
         const qty = Number(document.getElementById("edit_field_3").value) || 0;
-        document.getElementById("edit_field_4").value = (qty * rate).toFixed(2);
+
+        const subtotal = qty * rate;
+        const fee = subtotal * (feePercent / 100);
+        document.getElementById("edit_field_4").value = (
+          subtotal + fee
+        ).toFixed(2);
       }
 
       document
@@ -1797,22 +1876,21 @@
             }
           }
 
-          let url = "";
-          let payload = {};
-          if (type === "bill") {
-            url = `${API_URL}/${targetId}`;
-            payload = {
-              customer_name: newName,
-              month: document.getElementById("edit_field_2").value,
-              usage_details: document.getElementById("edit_field_3").value,
-              total_amount_usd: Number(
-                document.getElementById("edit_field_4").value,
-              ),
-            };
-          } else {
-            url = `/api/customers/${targetId}`;
-            payload = { customer_name: newName };
-          }
+          let url =
+            type === "bill"
+              ? `${API_URL}/bills/${targetId}`
+              : `${API_URL}/customers/${targetId}`;
+          let payload =
+            type === "bill"
+              ? {
+                  customer_name: newName,
+                  month: document.getElementById("edit_field_2").value,
+                  usage_details: document.getElementById("edit_field_3").value,
+                  total_amount_usd: Number(
+                    document.getElementById("edit_field_4").value,
+                  ),
+                }
+              : { customer_name: newName };
 
           try {
             const res = await fetch(url, {
@@ -1823,6 +1901,7 @@
             if (res.ok) {
               showToast("កែប្រែជោគជ័យ!", "success");
               closeModal("edit-form-modal");
+              billsHash = ""; // បង្ខំអោយទាញ Data ថ្មី
               fetchData();
             } else {
               showToast("បរាជ័យក្នុងការកែប្រែ", "error");
@@ -1851,10 +1930,13 @@
         }).then(async (res) => {
           if (res.isConfirmed) {
             try {
-              const url = isBill ? `${API_URL}/${id}` : `/api/customers/${id}`;
+              const url = isBill
+                ? `${API_URL}/bills/${id}`
+                : `${API_URL}/customers/${id}`;
               const r = await fetch(url, { method: "DELETE" });
               if (r.ok) {
                 showToast("លុបជោគជ័យ", "success");
+                billsHash = "";
                 fetchData();
               }
             } catch (e) {
@@ -1866,14 +1948,12 @@
 
       function calculateAdvancedAmount() {
         const rate = Number(session.rate) || 0;
-        document.getElementById("rate").value = rate;
-        document.getElementById("rate-hint").textContent =
-          `$${rate.toFixed(2)}`;
-
+        const feePercent = Number(session.fee_percent) || 0;
         const oldRead =
           Number(document.getElementById("old_reading").value) || 0;
         const newRead =
           Number(document.getElementById("new_reading").value) || 0;
+
         let qty = 0;
         if (newRead > 0 && newRead >= oldRead) {
           qty = newRead - oldRead;
@@ -1881,18 +1961,24 @@
         } else {
           qty = Number(document.getElementById("usage_details").value) || 0;
         }
+
+        // គណនា Subtotal រួចបូកបញ្ជូល Fee
+        const subtotal = qty * rate;
+        const fee = subtotal * (feePercent / 100);
         document.getElementById("total_amount_usd").value = (
-          qty * rate
+          subtotal + fee
         ).toFixed(2);
       }
 
       function calculateAutoAmount() {
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
         const qty = Number(document.getElementById("usage_details").value) || 0;
-        document.getElementById("rate-hint").textContent =
-          `$${rate.toFixed(2)}`;
+
+        const subtotal = qty * rate;
+        const fee = subtotal * (feePercent / 100);
         document.getElementById("total_amount_usd").value = (
-          qty * rate
+          subtotal + fee
         ).toFixed(2);
       }
 
@@ -1916,8 +2002,7 @@
           if (document.getElementById("old_reading"))
             document.getElementById("old_reading").value = 0;
         }
-        if (typeof calculateAdvancedAmount === "function")
-          calculateAdvancedAmount();
+        calculateAdvancedAmount();
       }
 
       function updateCustomerDatalist() {
@@ -1964,7 +2049,6 @@
               );
               btn.innerHTML = `ចេញវិក្កយបត្រ (Issue Bill)`;
               btn.disabled = false;
-              lucide.createIcons();
               return;
             }
           }
@@ -1980,14 +2064,10 @@
             );
             btn.innerHTML = `ចេញវិក្កយបត្រ (Issue Bill)`;
             btn.disabled = false;
-            lucide.createIcons();
             return;
           }
 
-          const generatedBillId =
-            "INV-" + Math.floor(10000000 + Math.random() * 90000000);
           const newBill = {
-            bill_id: generatedBillId,
             company: session.company,
             customer_name: reqName,
             consumer_no: cNo,
@@ -2007,7 +2087,7 @@
           };
 
           try {
-            const res = await fetch(API_URL, {
+            const res = await fetch(`${API_URL}/bills`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(newBill),
@@ -2023,15 +2103,19 @@
               } else {
                 showToast("ជោគជ័យ!", "success");
               }
+              billsHash = ""; // Force reload
               fetchData();
               document.getElementById("billForm").reset();
               document.getElementById("company").value = session.company;
-              const today = new Date();
-              document.getElementById("issue_date").value = today
+
+              document.getElementById("rate").value = session.rate || 0;
+              document.getElementById("fee-hint").textContent =
+                `សេវាកាត់: ${session.fee_percent || 0}%`;
+
+              document.getElementById("issue_date").value = new Date()
                 .toISOString()
                 .split("T")[0];
               updateDueDateOneWeek();
-              calculateAdvancedAmount();
             }
           } catch (e) {
             showToast("បរាជ័យ", "error");
@@ -2042,7 +2126,7 @@
           }
         });
 
-      // 8. Bulk Entry
+      // Bulk Entry
       function updateAllBulkMonths() {
         const m = document.getElementById("bulk-global-month").value;
         document
@@ -2051,15 +2135,20 @@
       }
       function calcMeterRow(id) {
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
         const oldM =
           Number(document.getElementById(`bulk-old-${id}`).value) || 0;
         const newM =
           Number(document.getElementById(`bulk-new-${id}`).value) || 0;
         let qty = newM - oldM;
         if (qty < 0) qty = 0;
+
+        const subtotal = qty * rate;
+        const fee = subtotal * (feePercent / 100);
+
         document.getElementById(`bulk-qty-${id}`).value = qty;
         document.getElementById(`bulk-total-${id}`).value = (
-          qty * rate
+          subtotal + fee
         ).toFixed(2);
       }
       async function submitBulkRow(cNo, cName) {
@@ -2084,21 +2173,17 @@
           );
           return;
         }
-
         if (t <= 0) return showToast("បរិមាណមិនត្រឹមត្រូវ!", "error");
 
-        const generatedBillId =
-          "INV-" + Math.floor(10000000 + Math.random() * 90000000);
         const iDate = new Date();
         const dDate = new Date(iDate);
         dDate.setDate(iDate.getDate() + 7);
 
         try {
-          await fetch(API_URL, {
+          await fetch(`${API_URL}/bills`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              bill_id: generatedBillId,
               company: session.company,
               customer_name: cName,
               consumer_no: cNo,
@@ -2113,6 +2198,7 @@
             }),
           });
           showToast(`ជោគជ័យ!`, "success");
+          billsHash = "";
           fetchData();
         } catch (e) {
           showToast("បរាជ័យ!", "error");
@@ -2127,10 +2213,14 @@
         });
         const custs = Object.values(unique);
         if (custs.length === 0) return showToast("គ្មានអតិថិជន!", "error");
+
         const m =
           document.getElementById("bulk-global-month").value ||
           new Date().toISOString().slice(0, 7);
         const r = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
+        const subtotal = 1 * r;
+        const t = subtotal + subtotal * (feePercent / 100);
 
         Swal.fire({
           title: "បញ្ជាក់",
@@ -2160,13 +2250,10 @@
               );
               if (monthDuplicate) continue;
               try {
-                const generatedBillId =
-                  "INV-" + Math.floor(10000000 + Math.random() * 90000000);
-                await fetch(API_URL, {
+                await fetch(`${API_URL}/bills`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    bill_id: generatedBillId,
                     company: session.company,
                     customer_name: c.customer_name,
                     consumer_no: c.consumer_no,
@@ -2175,7 +2262,7 @@
                     due_date: dDateStr,
                     usage_details: 1,
                     rate: r,
-                    total_amount_usd: r,
+                    total_amount_usd: t,
                   }),
                 });
                 s++;
@@ -2186,6 +2273,7 @@
               `បានបង្កើតវិក្កយបត្រចំនួន ${s} មិនរាប់បញ្ចូលអ្នកជាន់ខែឡើយ`,
               "success",
             );
+            billsHash = "";
             fetchData();
           }
         });
@@ -2202,6 +2290,12 @@
           new Date().toISOString().slice(0, 7);
         const isMeter = session.type === "meter";
         const rate = Number(session.rate) || 0;
+        const feePercent = Number(session.fee_percent) || 0;
+
+        const defaultSubtotal = 1 * rate;
+        const defaultTotal =
+          defaultSubtotal + defaultSubtotal * (feePercent / 100);
+
         document.getElementById("bulk-subtitle").textContent = isMeter
           ? "បញ្ចូលលេខកុងទ័រចាស់ និងថ្មី"
           : "ប្រព័ន្ធចេញវិក្កយបត្របង់ថេរស្វ័យប្រវត្តិ";
@@ -2211,8 +2305,9 @@
             .classList.remove("hidden");
         else
           document.getElementById("btn-auto-generate").classList.add("hidden");
+
         document.getElementById("bulk-table-head").innerHTML =
-          `<tr><th class="px-6 py-3 font-semibold">អតិថិជន / លេខកូដ</th><th class="px-6 py-3 w-40 font-semibold">សម្រាប់ខែ</th>${isMeter ? '<th class="px-6 py-3 w-32 font-semibold">កុងទ័រចាស់</th><th class="px-6 py-3 w-32 font-semibold">កុងទ័រថ្មី</th><th class="px-6 py-3 w-24 font-semibold">ប្រើប្រាស់</th>' : '<th class="px-6 py-3 w-32 font-semibold">តម្លៃថេរ</th>'}<th class="px-6 py-3 w-32 font-semibold">សរុប (USD)</th><th class="px-6 py-3 text-right font-semibold">សកម្មភាព</th></tr>`;
+          `<tr><th class="px-6 py-3 font-semibold">អតិថិជន / លេខកូដ</th><th class="px-6 py-3 w-40 font-semibold">សម្រាប់ខែ</th>${isMeter ? '<th class="px-6 py-3 w-32 font-semibold">កុងទ័រចាស់</th><th class="px-6 py-3 w-32 font-semibold">កុងទ័រថ្មី</th><th class="px-6 py-3 w-24 font-semibold">ប្រើប្រាស់</th>' : '<th class="px-6 py-3 w-32 font-semibold">តម្លៃថេរ</th>'}<th class="px-6 py-3 w-32 font-semibold">សរុប (រួម Fee)</th><th class="px-6 py-3 text-right font-semibold">សកម្មភាព</th></tr>`;
 
         document.getElementById("bulk-table-body").innerHTML =
           Object.values(unique)
@@ -2224,13 +2319,12 @@
                 cBills.length > 0
                   ? cBills[0].new_reading || cBills[0].usage_details || 0
                   : 0;
-              return `<tr class="hover:bg-slate-50 border-b border-slate-50" id="bulk-row-${c.consumer_no}"><td class="px-6 py-3"><div class="font-bold text-slate-800">${c.customer_name || "N/A"}</div><div class="text-xs text-slate-500 font-mono">${c.consumer_no}</div></td><td class="px-6 py-3"><input type="month" value="${m}" id="bulk-month-${c.consumer_no}" class="border border-slate-200 rounded-lg p-1.5 text-sm w-full outline-none focus:ring-2 focus:ring-indigo-500"></td>${isMeter ? `<td class="px-6 py-3"><input type="number" id="bulk-old-${c.consumer_no}" value="${lastRead}" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full outline-none font-mono focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-new-${c.consumer_no}" placeholder="0" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full font-mono outline-none focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none font-semibold text-slate-600" value="0"></td>` : `<td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none text-center font-semibold text-slate-600" value="1"></td>`}<td class="px-6 py-3"><input type="text" id="bulk-total-${c.consumer_no}" readonly class="bg-indigo-50/50 text-indigo-700 font-bold border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none" value="${!isMeter ? rate.toFixed(2) : "0.00"}"></td><td class="px-6 py-3 text-right"><button onclick="submitBulkRow('${c.consumer_no}', '${escapeHtml(c.customer_name)}')" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-xs font-bold ml-auto flex items-center gap-1.5 hover:bg-emerald-100 transition-colors shadow-sm"><i data-lucide="send" class="w-3.5 h-3.5"></i> ${isMeter ? "ចេញវិក្កយបត្រ" : "Issue Bill"}</button></td></tr>`;
+              return `<tr class="hover:bg-slate-50 border-b border-slate-50" id="bulk-row-${c.consumer_no}"><td class="px-6 py-3"><div class="font-bold text-slate-800">${c.customer_name || "N/A"}</div><div class="text-xs text-slate-500 font-mono">${c.consumer_no}</div></td><td class="px-6 py-3"><input type="month" value="${m}" id="bulk-month-${c.consumer_no}" class="border border-slate-200 rounded-lg p-1.5 text-sm w-full outline-none focus:ring-2 focus:ring-indigo-500"></td>${isMeter ? `<td class="px-6 py-3"><input type="number" id="bulk-old-${c.consumer_no}" value="${lastRead}" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full outline-none font-mono focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-new-${c.consumer_no}" placeholder="0" oninput="calcMeterRow('${c.consumer_no}')" class="border border-slate-300 rounded-lg p-2 text-sm w-full font-mono outline-none focus:ring-2 focus:ring-indigo-500"></td><td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none font-semibold text-slate-600" value="0"></td>` : `<td class="px-6 py-3"><input type="number" id="bulk-qty-${c.consumer_no}" readonly class="bg-slate-100 border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none text-center font-semibold text-slate-600" value="1"></td>`}<td class="px-6 py-3"><input type="text" id="bulk-total-${c.consumer_no}" readonly class="bg-indigo-50/50 text-indigo-700 font-bold border-transparent rounded-lg p-2 text-sm w-full font-mono outline-none" value="${!isMeter ? defaultTotal.toFixed(2) : "0.00"}"></td><td class="px-6 py-3 text-right"><button onclick="submitBulkRow('${c.consumer_no}', '${escapeHtml(c.customer_name)}')" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-xs font-bold ml-auto flex items-center gap-1.5 hover:bg-emerald-100 transition-colors shadow-sm"><i data-lucide="send" class="w-3.5 h-3.5"></i> ${isMeter ? "ចេញវិក្កយបត្រ" : "Issue Bill"}</button></td></tr>`;
             })
             .join("") ||
           '<tr><td colspan="7" class="text-center py-12 text-slate-400">គ្មានទិន្នន័យ</td></tr>';
       }
 
-      // 9. Customers Panel
       function renderCustomers() {
         const statusFilter = document.getElementById("filter-status").value;
         const cMap = {};
@@ -2267,7 +2361,7 @@
             <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button onclick="showCustomerSlip('${c.id}')" class="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition" title="វិក្កយបត្រចុងក្រោយ (Slip)"><i data-lucide="printer" class="w-4 h-4"></i></button>
-                  <button onclick="openEditModal('customer', '${c.id}', '${escapeHtml(c.name)}')" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition" title="កែប្រែឈ្មោះ (Edit Profile)"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                  <button onclick="editLatestCustomerBill('${c.id}')" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg transition" title="កែប្រែវិក្កយបត្រចុងក្រោយ"><i data-lucide="edit" class="w-4 h-4"></i></button>
                   <button onclick="deleteAction('customer', '${c.id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition" title="លុបអតិថិជន (Delete)"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </td>
@@ -2275,7 +2369,24 @@
         `,
             )
             .join("") ||
-          '<tr><td colspan="5" class="text-center py-12 text-slate-400">គ្មានទិន្នន័យអតិថិជនទេ</td></tr>';
+          '<tr><td colspan=\"5\" class=\"text-center py-12 text-slate-400\">គ្មានទិន្នន័យអតិថិជនទេ</td></tr>';
+      }
+
+      function editLatestCustomerBill(consumerNo) {
+        const customerBills = allBillsData.filter(
+          (b) => b.consumer_no === consumerNo,
+        );
+        if (customerBills.length > 0) {
+          customerBills.sort((a, b) =>
+            (a.month || "").localeCompare(b.month || ""),
+          );
+          openEditModal(
+            "bill",
+            customerBills[customerBills.length - 1].bill_id,
+          );
+        } else {
+          showToast("មិនមានវិក្កយបត្រដើម្បីកែប្រែទេ!", "error");
+        }
       }
 
       function showCustomerSlip(consumerNo) {
@@ -2284,9 +2395,9 @@
         );
         if (customerBills.length > 0) {
           customerBills.sort((a, b) =>
-            (b.month || "").localeCompare(a.month || ""),
+            (a.month || "").localeCompare(b.month || ""),
           );
-          showSlip(customerBills[0].bill_id);
+          showSlip(customerBills[customerBills.length - 1].bill_id);
         } else {
           showToast("អតិថិជននេះមិនទាន់មានវិក្កយបត្រទេ!", "error");
         }
