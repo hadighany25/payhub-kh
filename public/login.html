@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="km">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayHub KH | ចូលប្រព័ន្ធ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap");
+      body {
+        font-family: "Inter", "Kantumruy Pro", sans-serif;
+        background-color: #f8fafc;
+      }
+      .bg-login-pattern {
+        background-image: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      .bg-shape {
+        position: absolute;
+        background: rgba(99, 102, 241, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body class="flex h-screen w-full overflow-hidden">
+    <div
+      class="hidden lg:flex lg:w-1/2 bg-login-pattern flex-col justify-between p-12 text-white relative"
+    >
+      <div class="bg-shape w-96 h-96 -top-20 -left-20"></div>
+      <div class="bg-shape w-80 h-80 bottom-10 right-10 bg-indigo-500/20"></div>
+      <div class="relative z-10">
+        <div class="flex items-center gap-3 text-indigo-400 mb-12">
+          <i data-lucide="zap" class="w-8 h-8 fill-current"></i>
+          <span class="text-3xl font-bold tracking-wider text-white"
+            >PayHub KH</span
+          >
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6 mt-20">
+          ប្រព័ន្ធគ្រប់គ្រងវិក្កយបត្រ<br /><span class="text-indigo-400"
+            >លំដាប់ស្តង់ដារ</span
+          >
+        </h1>
+        <p class="text-slate-300 text-lg max-w-md leading-relaxed mb-8">
+          គ្រប់គ្រងការចេញវិក្កយបត្រ ទូទាត់ប្រាក់ ជូនដំណឹងដល់អតិថិជន
+          និងវិភាគទិន្នន័យចំណូល-ចំណាយ ទាំងអស់នៅក្នុងប្រព័ន្ធតែមួយ។
+        </p>
+      </div>
+      <div class="relative z-10 text-sm text-slate-500">
+        &copy; 2026 PayHub KH. រក្សាសិទ្ធិគ្រប់យ៉ាង។
+      </div>
+    </div>
+
+    <div
+      class="w-full lg:w-1/2 flex items-center justify-center bg-white p-8 overflow-y-auto"
+    >
+      <div class="w-full max-w-md space-y-8">
+        <div
+          class="flex lg:hidden items-center justify-center gap-2 text-indigo-600 mb-8"
+        >
+          <i data-lucide="zap" class="w-8 h-8 fill-current"></i>
+          <span class="text-2xl font-bold tracking-wider text-slate-900"
+            >PayHub KH</span
+          >
+        </div>
+        <div class="text-center lg:text-left">
+          <h2 class="text-3xl font-bold text-slate-900 mb-2">ចូលប្រព័ន្ធ</h2>
+          <p class="text-slate-500">សូមស្វាគមន៍មកកាន់ប្រព័ន្ធ Biller Gateway</p>
+        </div>
+
+        <form id="loginForm" class="space-y-5 mt-8">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2"
+              >ចូលក្នុងនាមជា (Role) <span class="text-rose-500">*</span></label
+            >
+            <div class="grid grid-cols-2 gap-4">
+              <label class="cursor-pointer">
+                <input
+                  type="radio"
+                  name="role"
+                  value="company"
+                  class="peer sr-only"
+                  checked
+                  onchange="toggleCompanySelect()"
+                />
+                <div
+                  class="rounded-xl border-2 border-slate-200 px-4 py-3 hover:bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 transition-all flex items-center gap-3"
+                >
+                  <i
+                    data-lucide="building-2"
+                    class="w-5 h-5 text-slate-400 peer-checked:text-indigo-600"
+                  ></i>
+                  <span
+                    class="font-semibold text-slate-600 peer-checked:text-indigo-900"
+                    >ក្រុមហ៊ុន</span
+                  >
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input
+                  type="radio"
+                  name="role"
+                  value="superadmin"
+                  class="peer sr-only"
+                  onchange="toggleCompanySelect()"
+                />
+                <div
+                  class="rounded-xl border-2 border-slate-200 px-4 py-3 hover:bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 transition-all flex items-center gap-3"
+                >
+                  <i
+                    data-lucide="shield-check"
+                    class="w-5 h-5 text-slate-400 peer-checked:text-indigo-600"
+                  ></i>
+                  <span
+                    class="font-semibold text-slate-600 peer-checked:text-indigo-900"
+                    >Super Admin</span
+                  >
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div id="companySelectGroup" class="transition-all duration-300">
+            <label class="block text-sm font-semibold text-slate-700 mb-1"
+              >ជ្រើសរើសក្រុមហ៊ុន <span class="text-rose-500">*</span></label
+            >
+            <select
+              id="company"
+              required
+              class="w-full bg-slate-50 border border-slate-300 text-slate-900 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-indigo-600 transition-all"
+            >
+              <option value="" disabled selected>
+                -- កំពុងទាញយកទិន្នន័យ --
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1"
+              >អុីមែល (Email) <span class="text-rose-500">*</span></label
+            >
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"
+              >
+                <i data-lucide="mail" class="w-5 h-5 text-slate-400"></i>
+              </div>
+              <input
+                type="email"
+                id="email"
+                required
+                placeholder="admin@domain.com"
+                class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl pl-11 p-3.5 outline-none focus:ring-2 focus:ring-indigo-600"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-sm font-semibold text-slate-700"
+                >ពាក្យសម្ងាត់ <span class="text-rose-500">*</span></label
+              >
+            </div>
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"
+              >
+                <i data-lucide="lock" class="w-5 h-5 text-slate-400"></i>
+              </div>
+              <input
+                type="password"
+                id="password"
+                required
+                placeholder="••••••••"
+                class="w-full bg-white border border-slate-300 text-slate-900 rounded-xl pl-11 p-3.5 outline-none focus:ring-2 focus:ring-indigo-600"
+              />
+              <button
+                type="button"
+                onclick="togglePassword()"
+                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+              >
+                <i id="eyeIcon" data-lucide="eye" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            id="loginBtn"
+            class="w-full text-white bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-md px-5 py-4 transition-all shadow-lg flex items-center justify-center gap-2 mt-4"
+          >
+            <i data-lucide="log-in" class="w-5 h-5"></i> ចូលប្រព័ន្ធ
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      lucide.createIcons();
+
+      // ទាញយកឈ្មោះក្រុមហ៊ុនពី Server មកដាក់ក្នុង Dropdown
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const res = await fetch("/api/companies");
+          if (res.ok) {
+            const companies = await res.json();
+            const select = document.getElementById("company");
+
+            // សម្អាតចោលសិន
+            select.innerHTML =
+              '<option value="" disabled selected>-- សូមជ្រើសរើសក្រុមហ៊ុន --</option>';
+
+            if (companies.length === 0) {
+              select.innerHTML =
+                '<option value="" disabled>មិនមានក្រុមហ៊ុនក្នុងប្រព័ន្ធ</option>';
+            } else {
+              companies.forEach((c) => {
+                const option = document.createElement("option");
+                option.value = c;
+                option.textContent = c;
+                select.appendChild(option);
+              });
+            }
+          } else {
+            document.getElementById("company").innerHTML =
+              '<option value="" disabled>មិនអាចទាញទិន្នន័យបាន</option>';
+          }
+        } catch (e) {
+          console.error("មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ", e);
+          document.getElementById("company").innerHTML =
+            '<option value="" disabled>Server អត់ដំណើរការ</option>';
+        }
+      });
+
+      function togglePassword() {
+        const pwd = document.getElementById("password");
+        const icon = document.getElementById("eyeIcon");
+        if (pwd.type === "password") {
+          pwd.type = "text";
+          icon.setAttribute("data-lucide", "eye-off");
+        } else {
+          pwd.type = "password";
+          icon.setAttribute("data-lucide", "eye");
+        }
+        lucide.createIcons();
+      }
+
+      function toggleCompanySelect() {
+        const role = document.querySelector('input[name="role"]:checked').value;
+        const group = document.getElementById("companySelectGroup");
+        const select = document.getElementById("company");
+        if (role === "superadmin") {
+          group.classList.add("hidden");
+          select.removeAttribute("required");
+        } else {
+          group.classList.remove("hidden");
+          select.setAttribute("required", "required");
+        }
+      }
+
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const btn = document.getElementById("loginBtn");
+          const role = document.querySelector(
+            'input[name="role"]:checked',
+          ).value;
+          const company = document.getElementById("company").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          if (role === "company" && !company)
+            return Swal.fire({
+              icon: "warning",
+              title: "សូមបញ្ជាក់",
+              text: "សូមជ្រើសរើសក្រុមហ៊ុនរបស់អ្នក!",
+              heightAuto: false,
+            });
+
+          const originalBtnText = btn.innerHTML;
+          btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> កំពុងផ្ទៀងផ្ទាត់...`;
+          btn.disabled = true;
+
+          try {
+            const res = await fetch("/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ role, company, email, password }),
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+              const sessionData = {
+                isLoggedIn: true,
+                role,
+                ...data.user,
+                company: role === "company" ? data.user.name : "All",
+              };
+              sessionStorage.setItem(
+                "payhub_session",
+                JSON.stringify(sessionData),
+              );
+
+              Swal.fire({
+                icon: "success",
+                title: data.message,
+                showConfirmButton: false,
+                timer: 1500,
+                heightAuto: false,
+              }).then(() => {
+                window.location.href =
+                  role === "superadmin" ? "admin.html" : "dashboard.html";
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "បរាជ័យ",
+                text: data.message,
+                heightAuto: false,
+              });
+              btn.innerHTML = originalBtnText;
+              btn.disabled = false;
+              lucide.createIcons();
+            }
+          } catch (error) {
+            Swal.fire({
+              icon: "error",
+              title: "Server Error",
+              text: "មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!",
+              heightAuto: false,
+            });
+            btn.innerHTML = originalBtnText;
+            btn.disabled = false;
+            lucide.createIcons();
+          }
+        });
+    </script>
+  </body>
+</html>

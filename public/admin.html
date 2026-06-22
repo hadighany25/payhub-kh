@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="km">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayHub HQ | Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap");
+      body {
+        font-family: "Inter", "Kantumruy Pro", sans-serif;
+        background-color: #f4f7fe;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      .nav-active {
+        background: linear-gradient(
+          90deg,
+          rgba(15, 23, 42, 0.1) 0%,
+          rgba(15, 23, 42, 0) 100%
+        );
+        color: #0f172a;
+        border-left: 4px solid #0f172a;
+        font-weight: 600;
+      }
+      .nav-inactive {
+        color: #64748b;
+        border-left: 4px solid transparent;
+      }
+      .nav-inactive:hover {
+        background-color: #f8fafc;
+        color: #0f172a;
+      }
+
+      /* Toggle Switch Styles */
+      .toggle-checkbox:checked {
+        right: 0;
+        border-color: #10b981;
+      }
+      .toggle-checkbox:checked + .toggle-label {
+        background-color: #10b981;
+      }
+    </style>
+  </head>
+  <body class="flex h-screen overflow-hidden text-slate-800">
+    <script>
+      const session = JSON.parse(sessionStorage.getItem("payhub_session"));
+      if (!session || !session.isLoggedIn || session.role !== "superadmin")
+        window.location.href = "login.html";
+    </script>
+
+    <aside
+      class="w-64 bg-white border-r border-slate-200 flex flex-col z-20 shadow-sm"
+    >
+      <div class="h-[76px] flex items-center px-6 border-b border-slate-100">
+        <div
+          class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white mr-3"
+        >
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-slate-900"
+          >PayHub HQ</span
+        >
+      </div>
+      <div class="px-6 py-5">
+        <p
+          class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"
+        >
+          កណ្តាល (Core)
+        </p>
+        <nav class="space-y-1 -mx-3">
+          <button
+            onclick="switchView('overview')"
+            id="nav-overview"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg nav-active"
+          >
+            <i data-lucide="pie-chart" class="w-5 h-5"></i> ទិដ្ឋភាពទូទៅ
+          </button>
+          <button
+            onclick="switchView('companies')"
+            id="nav-companies"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg nav-inactive"
+          >
+            <i data-lucide="building-2" class="w-5 h-5"></i> គ្រប់គ្រងក្រុមហ៊ុន
+          </button>
+        </nav>
+      </div>
+      <div class="mt-auto p-6 border-t border-slate-100 bg-slate-50/50">
+        <button
+          onclick="logout()"
+          class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600 rounded-lg font-semibold shadow-sm"
+        >
+          <i data-lucide="log-out" class="w-4 h-4"></i> ចាកចេញ
+        </button>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+      <header
+        class="h-[76px] bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10"
+      >
+        <div>
+          <h1 id="page-title" class="text-2xl font-bold text-slate-900">
+            ទិដ្ឋភាពទូទៅ (System Overview)
+          </h1>
+        </div>
+        <span
+          class="bg-emerald-100 text-emerald-700 font-bold text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5"
+          ><div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          System Online</span
+        >
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-8 relative">
+        <div id="view-overview" class="view-section space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5"
+            >
+              <div
+                class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center"
+              >
+                <i data-lucide="building" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <p
+                  class="text-sm font-bold text-slate-400 uppercase tracking-wide"
+                >
+                  ក្រុមហ៊ុន (Billers)
+                </p>
+                <h3
+                  class="text-3xl font-bold text-slate-900 mt-1"
+                  id="stat-companies"
+                >
+                  0
+                </h3>
+              </div>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5"
+            >
+              <div
+                class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center"
+              >
+                <i data-lucide="receipt" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <p
+                  class="text-sm font-bold text-slate-400 uppercase tracking-wide"
+                >
+                  វិក្កយបត្រសរុប
+                </p>
+                <h3
+                  class="text-3xl font-bold text-slate-900 mt-1"
+                  id="stat-bills"
+                >
+                  0
+                </h3>
+              </div>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5"
+            >
+              <div
+                class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"
+              >
+                <i data-lucide="dollar-sign" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <p
+                  class="text-sm font-bold text-slate-400 uppercase tracking-wide"
+                >
+                  ទឹកប្រាក់ចរាចរណ៍
+                </p>
+                <h3
+                  class="text-3xl font-bold text-slate-900 mt-1"
+                  id="stat-volume"
+                >
+                  $0.00
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mt-6"
+          >
+            <h2
+              class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"
+            >
+              <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-500"></i>
+              Heat Map លំហូរទឹកប្រាក់ (ឧទាហរណ៍)
+            </h2>
+            <div
+              class="h-64 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50"
+            >
+              <canvas id="trxChart" height="80"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="view-companies"
+          class="view-section hidden flex-col h-[calc(100vh-10rem)]"
+        >
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-100 flex-1 flex flex-col overflow-hidden"
+          >
+            <div
+              class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white"
+            >
+              <div>
+                <h2 class="text-lg font-bold text-slate-800">
+                  បញ្ជីក្រុមហ៊ុន / ដៃគូសហការ
+                </h2>
+              </div>
+              <button
+                onclick="openCompanyModal()"
+                class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
+              >
+                <i data-lucide="plus" class="w-4 h-4"></i> បន្ថែមក្រុមហ៊ុនថ្មី
+              </button>
+            </div>
+            <div class="overflow-y-auto flex-1">
+              <table class="w-full text-sm text-left text-slate-600">
+                <thead
+                  class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 z-10 border-b border-slate-200"
+                >
+                  <tr>
+                    <th class="px-6 py-4 font-semibold">ក្រុមហ៊ុន (Biller)</th>
+                    <th class="px-6 py-4 font-semibold">
+                      ទូរស័ព្ទ / ប្រភេទសេវា
+                    </th>
+                    <th class="px-6 py-4 font-semibold">
+                      U-PAY Account (ទូទាត់)
+                    </th>
+                    <th class="px-6 py-4 font-semibold text-center">Status</th>
+                    <th class="px-6 py-4 font-semibold text-right">Balance</th>
+                    <th class="px-6 py-4 font-semibold text-right">សកម្មភាព</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="companies-table-body"
+                  class="divide-y divide-slate-100 bg-white"
+                ></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div
+      id="company-modal"
+      class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity overflow-y-auto p-4"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-auto"
+      >
+        <div
+          class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white"
+        >
+          <h3
+            class="text-lg font-bold flex items-center gap-2"
+            id="modal-title"
+          >
+            <i data-lucide="building" class="w-5 h-5"></i> បន្ថែមក្រុមហ៊ុនថ្មី
+          </h3>
+          <button
+            onclick="closeCompanyModal()"
+            class="hover:bg-white/20 rounded p-1 transition"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="p-6 max-h-[80vh] overflow-y-auto">
+          <form id="companyForm" class="space-y-4">
+            <input type="hidden" id="compId" />
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >ឈ្មោះក្រុមហ៊ុន <span class="text-rose-500">*</span></label
+                >
+                <input
+                  type="text"
+                  id="compName"
+                  required
+                  placeholder="ឧ. អគ្គិសនីកម្ពុជា"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >លេខទូរស័ព្ទ <span class="text-rose-500">*</span></label
+                >
+                <input
+                  type="text"
+                  id="compPhone"
+                  required
+                  placeholder="012 345 678"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >Category <span class="text-rose-500">*</span></label
+                >
+                <select
+                  id="compCategory"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+                >
+                  <option value="Utility">ទឹក, ភ្លើង (Utility)</option>
+                  <option value="Telecom">ទូរគមនាគមន៍ (Telecom)</option>
+                  <option value="Education">អប់រំ (Education)</option>
+                  <option value="Other">ផ្សេងៗ (Other)</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >កិច្ចសន្យាផុតកំណត់</label
+                >
+                <input
+                  type="date"
+                  id="compExpiry"
+                  required
+                  class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+                />
+              </div>
+            </div>
+
+            <hr class="my-4 border-slate-200" />
+
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+              <label
+                class="block text-xs font-bold text-indigo-800 uppercase mb-1.5"
+                >គណនី U-PAY ទទួលប្រាក់ (Settlement)
+                <span class="text-rose-500">*</span></label
+              >
+              <div class="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  id="compUpayAcc"
+                  required
+                  placeholder="បញ្ជូលលេខគណនី (ឧ. 001122334)"
+                  class="w-full bg-white border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+                  oninput="resetVerification()"
+                />
+                <button
+                  type="button"
+                  onclick="verifyAccount()"
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold transition flex items-center gap-1"
+                >
+                  <i data-lucide="check-circle" class="w-4 h-4"></i> Check
+                </button>
+              </div>
+              <div
+                id="verify-result"
+                class="text-sm font-semibold text-rose-600 hidden"
+              >
+                សិ្ថតភាព: <span id="acc-owner-name">មិនទាន់ផ្ទៀងផ្ទាត់</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >ប្រព័ន្ធវិក្កយបត្រ
+                  <span class="text-rose-500">*</span></label
+                >
+                <select
+                  id="compType"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+                >
+                  <option value="meter">ប្រើកុងទ័រ (Meter)</option>
+                  <option value="fixed">បង់ថេរ (Fixed)</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >តម្លៃគោល/ឯកតា ($)</label
+                >
+                <input
+                  type="number"
+                  id="compRate"
+                  step="0.01"
+                  required
+                  placeholder="0.00"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >ថ្លៃសេវា PayHub កាត់ (%)</label
+                >
+                <input
+                  type="number"
+                  id="compFee"
+                  step="0.1"
+                  required
+                  placeholder="ឧ. 0.5"
+                  class="w-full bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                  >អុីមែល (Login) <span class="text-rose-500">*</span></label
+                >
+                <input
+                  type="email"
+                  id="compEmail"
+                  required
+                  placeholder="admin@company.com"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-500 uppercase mb-1.5"
+                >ពាក្យសម្ងាត់ (Login)
+                <span class="text-rose-500">*</span></label
+              >
+              <input
+                type="text"
+                id="compPassword"
+                required
+                placeholder="បញ្ចូលពាក្យសម្ងាត់..."
+                class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-indigo-600"
+              />
+            </div>
+
+            <button
+              type="submit"
+              id="btn-submit-comp"
+              class="w-full text-white bg-slate-900 hover:bg-slate-800 font-bold rounded-lg px-5 py-3.5 mt-4 transition-all shadow-md flex justify-center items-center gap-2 opacity-50 cursor-not-allowed"
+              disabled
+            >
+              <i data-lucide="save" class="w-5 h-5"></i> រក្សាទុកទិន្នន័យ (ត្រូវ
+              Check U-PAY សិន)
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="toast-container"
+      class="fixed bottom-6 right-6 z-[70] flex flex-col gap-3 pointer-events-none"
+    ></div>
+
+    <script>
+      lucide.createIcons();
+      let allCompaniesData = [];
+      let companiesHash = ""; // សម្រាប់ឆែកទិន្នន័យចាស់ជៀសវាង UI Refresh ញ័រ
+      let isAccountVerified = false;
+
+      // ប្រើ /api ជាស្តង់ដារសម្រាប់ Monolithic (មិនគាំងលើ Render ទៀតទេ)
+      const API_URL = "/api";
+      const UPAY_API = "https://u-pay-bank.onrender.com/api/bank";
+
+      // ដំណើរការពេល Page ដើរ (មាន Local Storage ដើម្បីចាំ Tab)
+      document.addEventListener("DOMContentLoaded", () => {
+        // រក្សាទុក Tab មិនឱ្យលោតទៅដើមវិញពេល F5
+        const activeTab =
+          sessionStorage.getItem("admin_active_tab") || "overview";
+        switchView(activeTab);
+
+        // ទាញទិន្នន័យលើកដំបូង
+        fetchDashboardStats();
+        fetchCompanies();
+
+        // [មុខងារស្វ័យប្រវត្តិ] Auto-Refresh រៀងរាល់ ៤ វិនាទី
+        setInterval(() => {
+          fetchDashboardStats();
+          fetchCompanies();
+        }, 4000);
+      });
+
+      function switchView(view) {
+        ["overview", "companies"].forEach((v) => {
+          document.getElementById(`view-${v}`).classList.add("hidden");
+          if (v === "companies")
+            document.getElementById(`view-${v}`).classList.remove("flex");
+          document.getElementById(`nav-${v}`).className =
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg nav-inactive";
+        });
+        document.getElementById(`view-${view}`).classList.remove("hidden");
+        if (view === "companies") {
+          document.getElementById(`view-${view}`).classList.add("flex");
+          fetchCompanies();
+        }
+        document.getElementById(`nav-${view}`).className =
+          "w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg nav-active";
+        document.getElementById("page-title").textContent =
+          view === "overview"
+            ? "ទិដ្ឋភាពទូទៅ (System Overview)"
+            : "គ្រប់គ្រងក្រុមហ៊ុន (Manage Billers)";
+
+        // កត់ចំណាំការចុច Tab ចូលក្នុង Local Storage
+        sessionStorage.setItem("admin_active_tab", view);
+      }
+
+      function logout() {
+        sessionStorage.removeItem("payhub_session");
+        window.location.href = "login.html";
+      }
+
+      async function fetchDashboardStats() {
+        try {
+          const resBills = await fetch(`${API_URL}/bills`);
+          const bills = await resBills.json();
+          document.getElementById("stat-bills").textContent = bills.length;
+          let totalVol = bills
+            .filter((b) => b.status === "Paid")
+            .reduce((sum, b) => sum + parseFloat(b.total_amount_usd || 0), 0);
+          document.getElementById("stat-volume").textContent =
+            `$${totalVol.toFixed(2)}`;
+
+          const resUsers = await fetch(`${API_URL}/admin/users`);
+          if (resUsers.ok) {
+            const users = await resUsers.json();
+            const companies = users.filter((u) => u.role === "company");
+            document.getElementById("stat-companies").textContent =
+              companies.length;
+          }
+        } catch (error) {}
+      }
+
+      async function fetchCompanies() {
+        try {
+          const res = await fetch(`${API_URL}/admin/users`);
+          const users = await res.json();
+          const newData = users.filter((u) => u.role === "company");
+
+          // ឆែកមើលថាតើទិន្នន័យមានការប្រែប្រួលដែរឬទេ? (ការពារការលោត Refresh ញាក់ៗ)
+          const newHash = JSON.stringify(newData);
+          if (companiesHash !== newHash) {
+            companiesHash = newHash;
+            allCompaniesData = newData;
+            renderCompaniesTable();
+          }
+        } catch (error) {}
+      }
+
+      function renderCompaniesTable() {
+        document.getElementById("companies-table-body").innerHTML =
+          allCompaniesData
+            .map(
+              (c) => `
+            <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
+              <td class="px-6 py-4">
+                <div class="font-bold text-slate-800">${c.name}</div>
+                <div class="text-xs text-indigo-600 font-semibold">${c.id}</div>
+              </td>
+              <td class="px-6 py-4">
+                  <div class="text-slate-600 font-medium">${c.phone || "-"}</div>
+                  <div class="text-xs text-slate-400">${c.category || "N/A"}</div>
+              </td>
+              <td class="px-6 py-4">
+                  <span class="font-mono text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${c.upay_account || "N/A"}</span>
+                  <div class="text-[10px] text-amber-600 mt-1">Fee: ${c.fee_percent || 0}%</div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                  <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in cursor-pointer" onclick="toggleStatus('${c.id}', '${c.status}')">
+                      <input type="checkbox" ${c.status === "active" ? "checked" : ""} class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200" style="border-color: ${c.status === "active" ? "#10b981" : "#cbd5e1"}; right: ${c.status === "active" ? "0" : "20px"};"/>
+                      <label class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer" style="background-color: ${c.status === "active" ? "#10b981" : "#e2e8f0"}"></label>
+                  </div>
+              </td>
+              <td class="px-6 py-4 text-right font-bold text-emerald-600">$${parseFloat(c.balance || 0).toFixed(2)}</td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="openCompanyModal('${c.id}')" class="p-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                    <button onclick="deleteCompany('${c.id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+              </td>
+            </tr>
+          `,
+            )
+            .join("") ||
+          '<tr><td colspan="6" class="text-center py-12 text-slate-400">មិនមានទិន្នន័យទេ</td></tr>';
+        lucide.createIcons();
+      }
+
+      // --- U-PAY Account Verification System ---
+      function resetVerification() {
+        isAccountVerified = false;
+        const btn = document.getElementById("btn-submit-comp");
+        btn.disabled = true;
+        btn.classList.add("opacity-50", "cursor-not-allowed");
+        btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> រក្សាទុកទិន្នន័យ (ត្រូវ Check U-PAY សិន)`;
+        document.getElementById("verify-result").classList.add("hidden");
+        lucide.createIcons();
+      }
+
+      async function verifyAccount() {
+        const accNo = document.getElementById("compUpayAcc").value.trim();
+        if (!accNo)
+          return Swal.fire(
+            "បញ្ជាក់",
+            "សូមវាយលេខគណនី U-PAY ជាមុនសិន!",
+            "warning",
+          );
+
+        Swal.fire({
+          title: "កំពុងផ្ទៀងផ្ទាត់ធនាគារ...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+        });
+
+        try {
+          const res = await fetch(
+            `https://u-pay-bank.onrender.com/api/bank/verify-account/${accNo}`,
+          );
+          const data = await res.json();
+          Swal.close();
+
+          const vResult = document.getElementById("verify-result");
+          vResult.classList.remove("hidden");
+
+          if (res.ok && data.success) {
+            vResult.className = "text-sm font-semibold text-emerald-600 mt-2";
+            vResult.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 inline"></i> គណនីត្រឹមត្រូវ: <b>${data.account_name}</b>`;
+
+            isAccountVerified = true;
+            const btn = document.getElementById("btn-submit-comp");
+            btn.disabled = false;
+            btn.classList.remove("opacity-50", "cursor-not-allowed");
+            btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> រក្សាទុកទិន្នន័យ`;
+            lucide.createIcons();
+          } else {
+            vResult.className = "text-sm font-semibold text-rose-600 mt-2";
+            vResult.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 inline"></i> ${data.message || "រកមិនឃើញគណនី!"}`;
+            resetVerification();
+          }
+        } catch (e) {
+          Swal.close();
+          Swal.fire(
+            "Error",
+            "មិនអាចភ្ជាប់ទៅកាន់ U-PAY Server ទេ! សូមប្រាកដថាប្រព័ន្ធ U-PAY (Render) មិនកំពុងដេក (Sleep)។",
+            "error",
+          );
+        }
+      }
+
+      // --- Add/Edit Modal ---
+      function openCompanyModal(companyId = null) {
+        document.getElementById("company-modal").classList.remove("hidden");
+        resetVerification();
+
+        if (companyId) {
+          const c = allCompaniesData.find((u) => u.id === companyId);
+          if (c) {
+            document.getElementById("modal-title").innerHTML =
+              `<i data-lucide="edit" class="w-5 h-5"></i> កែប្រែព័ត៌មានក្រុមហ៊ុន`;
+            document.getElementById("compId").value = c.id;
+            document.getElementById("compName").value = c.name;
+            document.getElementById("compPhone").value = c.phone || "";
+            document.getElementById("compCategory").value =
+              c.category || "Utility";
+            document.getElementById("compExpiry").value = c.expiry_date || "";
+            document.getElementById("compUpayAcc").value = c.upay_account || "";
+            document.getElementById("compType").value = c.type;
+            document.getElementById("compRate").value = c.rate;
+            document.getElementById("compFee").value = c.fee_percent || 0;
+            document.getElementById("compEmail").value = c.email;
+            document.getElementById("compPassword").value = c.password;
+          }
+        } else {
+          document.getElementById("companyForm").reset();
+          document.getElementById("compId").value = "";
+          document.getElementById("modal-title").innerHTML =
+            `<i data-lucide="building" class="w-5 h-5"></i> បន្ថែមក្រុមហ៊ុនថ្មី`;
+        }
+        lucide.createIcons();
+      }
+
+      function closeCompanyModal() {
+        document.getElementById("company-modal").classList.add("hidden");
+      }
+
+      // --- Submit Company ---
+      document
+        .getElementById("companyForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (!isAccountVerified)
+            return Swal.fire(
+              "ចាំសិន",
+              "សូមចុចប៊ូតុង Check ដើម្បីផ្ទៀងផ្ទាត់គណនី U-PAY ជាមុនសិន!",
+              "warning",
+            );
+
+          const btn = document.getElementById("btn-submit-comp");
+          const ogText = btn.innerHTML;
+          btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> កំពុងរក្សាទុក...`;
+          btn.disabled = true;
+
+          const id = document.getElementById("compId").value;
+          const payload = {
+            name: document.getElementById("compName").value,
+            phone: document.getElementById("compPhone").value,
+            category: document.getElementById("compCategory").value,
+            expiry_date: document.getElementById("compExpiry").value,
+            upay_account: document.getElementById("compUpayAcc").value,
+            type: document.getElementById("compType").value,
+            rate: parseFloat(document.getElementById("compRate").value),
+            fee_percent: parseFloat(document.getElementById("compFee").value),
+            email: document.getElementById("compEmail").value,
+            password: document.getElementById("compPassword").value,
+          };
+
+          try {
+            let res = id
+              ? await fetch(`${API_URL}/admin/users/${id}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                })
+              : await fetch(`${API_URL}/register`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                });
+            const data = await res.json();
+            if (res.ok) {
+              showToast("រក្សាទុកជោគជ័យ!", "success");
+              closeCompanyModal();
+              fetchCompanies();
+              fetchDashboardStats();
+            } else {
+              Swal.fire("បរាជ័យ", data.message, "error");
+            }
+          } catch (err) {
+            Swal.fire("Error", "Server Error", "error");
+          } finally {
+            btn.innerHTML = ogText;
+            btn.disabled = false;
+            lucide.createIcons();
+          }
+        });
+
+      // --- Status Toggle (Active/Inactive) ---
+      async function toggleStatus(id, currentStatus) {
+        const newStatus = currentStatus === "active" ? "inactive" : "active";
+        try {
+          const res = await fetch(`${API_URL}/admin/users/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus }),
+          });
+          if (res.ok) {
+            showToast(
+              `ប្តូរស្ថានភាពទៅជា ${newStatus.toUpperCase()}`,
+              "success",
+            );
+
+            // បញ្ជាឱ្យទាញទិន្នន័យដើម្បី Update UI ភ្លាមៗដោយបង្ខំ
+            companiesHash = "";
+            fetchCompanies();
+          }
+        } catch (e) {
+          showToast("បរាជ័យក្នុងការប្តូរស្ថានភាព", "error");
+        }
+      }
+
+      function deleteCompany(id) {
+        Swal.fire({
+          title: "លុបក្រុមហ៊ុន?",
+          text: "ទិន្នន័យនឹងត្រូវលុបចោលទាំងស្រុង!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#ef4444",
+          confirmButtonText: "យល់ព្រម",
+          cancelButtonText: "បោះបង់",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const res = await fetch(`${API_URL}/admin/users/${id}`, {
+                method: "DELETE",
+              });
+              if (res.ok) {
+                showToast("លុបជោគជ័យ", "success");
+                companiesHash = "";
+                fetchCompanies();
+                fetchDashboardStats();
+              }
+            } catch (e) {}
+          }
+        });
+      }
+
+      function showToast(msg, type) {
+        const c = document.getElementById("toast-container");
+        const t = document.createElement("div");
+        const isOk = type === "success";
+        t.className = `flex items-center p-4 bg-white border-l-4 ${isOk ? "border-emerald-500" : "border-rose-500"} rounded shadow-lg toast-enter`;
+        t.innerHTML = `<div class="ml-2 mr-4 text-sm font-bold ${isOk ? "text-emerald-700" : "text-rose-700"}">${msg}</div>`;
+        c.appendChild(t);
+        setTimeout(() => {
+          t.classList.replace("toast-enter", "toast-leave");
+          setTimeout(() => t.remove(), 300);
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>
