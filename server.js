@@ -1,3 +1,4 @@
+require("dotenv").config(); // 🔥 ថែមបន្ទាត់នេះនៅខាងលើគេបង្អស់ ដើម្បីអានឯកសារ .env
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -15,8 +16,8 @@ app.use(express.static(path.join(__dirname, "public")));
 // -------------------------------------------------------------
 // ១. តភ្ជាប់ទៅកាន់ MongoDB Atlas
 // -------------------------------------------------------------
-const MONGO_URI =
-  "mongodb+srv://hadighany25_db_user:YNGQgEp2Pz6V8LWX@cluster0.izzf48u.mongodb.net/payhub_db?appName=Cluster0";
+// 🔥 ទាញយក Link MongoDB ពីឯកសារ .env (Local) ឬពី Secrets (Fly.io)
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose
   .connect(MONGO_URI)
@@ -185,7 +186,6 @@ app.post("/api/register", async (req, res) => {
         return res.status(400).json({ message: "ក្រុមហ៊ុននេះមានរួចហើយ!" });
     }
 
-    // ជួសជុលបញ្ហាការ Save ដោយប្រាកដថា rate និង fee_percent ជាលេខ (Number)
     const newUser = await User.create({
       id: `CO-${Date.now()}`,
       name,
@@ -314,7 +314,6 @@ app.put("/api/customers/:consumer_no", async (req, res) => {
 // ៤. GATEWAY (សម្រាប់ U-PAY ហៅចូលមក PayHub)
 // -------------------------------------------------------------
 
-// API នេះសម្រាប់ឱ្យ U-PAY App Scan QR Code រួចហៅមកសួររកវិក្កយបត្រ
 app.get("/api/gateway/check-bill", async (req, res) => {
   try {
     const { query } = req.query;
@@ -325,10 +324,8 @@ app.get("/api/gateway/check-bill", async (req, res) => {
         .json({ success: false, message: "សូមបញ្ចូលលេខវិក្កយបត្រ" });
     }
 
-    // 🔥 បំប្លែង Query ទៅជា Regex ដើម្បីមិនប្រកាន់អក្សរតូចឬធំ (Case-insensitive) និងកាត់ចន្លោះចេញ
     const safeQuery = new RegExp(`^${query.trim()}$`, "i");
 
-    // ស្វែងរកវិក្កយបត្រដែល Unpaid
     const bill = await Bill.findOne({
       $or: [{ bill_id: safeQuery }, { consumer_no: safeQuery }],
       status: new RegExp("^Unpaid$", "i"),
@@ -347,7 +344,6 @@ app.get("/api/gateway/check-bill", async (req, res) => {
         });
       }
 
-      // បោះទិន្នន័យពេញលេញទៅឱ្យ U-PAY App
       res.json({ success: true, bill });
     } else {
       res.status(404).json({
@@ -363,7 +359,6 @@ app.get("/api/gateway/check-bill", async (req, res) => {
   }
 });
 
-// API នេះសម្រាប់ឱ្យ U-PAY ហៅមកប្រាប់ PayHub ថាអតិថិជនទូទាត់រួចរាល់ហើយ (Webhook)
 app.post("/api/gateway/pay", async (req, res) => {
   try {
     const { bill_id, upay_trx_id } = req.body;
@@ -374,26 +369,21 @@ app.post("/api/gateway/pay", async (req, res) => {
         .status(400)
         .json({ success: false, message: "វិក្កយបត្រត្រូវបានទូទាត់រួចហើយ" });
 
-    // ១. កែប្រែស្ថានភាពវិក្កយបត្រទៅជា Paid
     bill.status = "Paid";
     bill.paid_at = new Date();
     await bill.save();
 
-    // ២. ការទូទាត់ទាត់កាត់កង (Settlement) ចូលគណនីក្រុមហ៊ុន
     const company = await User.findOne({ name: bill.company, role: "company" });
     if (company) {
       const totalPaid = parseFloat(bill.total_amount_usd);
       const feePercent = company.fee_percent || 0;
 
-      // គណនាលុយថ្លៃប្រើប្រាស់ដើម និងលុយថ្លៃសេវា ដែលបូកបញ្ចូលគ្នាក្នុង totalPaid
-      const netAmt = totalPaid / (1 + feePercent / 100); // ប្រាក់ថ្លៃប្រើប្រាស់សុទ្ធដែលត្រូវប្រគល់ឱ្យក្រុមហ៊ុន
-      const feeAmt = totalPaid - netAmt; // ប្រាក់សេវាដែល PayHub ត្រូវកាត់ទុក
+      const netAmt = totalPaid / (1 + feePercent / 100);
+      const feeAmt = totalPaid - netAmt;
 
-      // បញ្ចូលលុយទៅក្នុង Balance របស់ក្រុមហ៊ុនក្នុងប្រព័ន្ធ
       company.balance = (company.balance || 0) + netAmt;
       await company.save();
 
-      // ៣. កត់ត្រាចូលក្នុងតារាងប្រវត្តិ Transaction
       await Transaction.create({
         trx_id: upay_trx_id || `TRX-${Date.now()}`,
         bill_id: bill.bill_id,
@@ -411,4 +401,7 @@ app.post("/api/gateway/pay", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`✅ Server is running on port ${PORT}`));
+// 🔥 កែបន្ទាត់ខាងក្រោមនេះដើម្បីឱ្យត្រូវស្តង់ដាររបស់ Fly.io (ថែម "0.0.0.0")
+app.listen(PORT, "0.0.0.0", () =>
+  console.log(`✅ Server is running on port ${PORT}`),
+);
